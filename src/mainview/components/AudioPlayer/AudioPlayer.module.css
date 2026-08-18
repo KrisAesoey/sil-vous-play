@@ -1,0 +1,8 @@
+.button {
+	align-items: center;
+	background-color: blueviolet;
+	border-radius: 100%;
+	border-width: 0;
+	color: white;
+	padding: 1rem;
+}
