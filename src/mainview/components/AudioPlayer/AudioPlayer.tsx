@@ -1,14 +1,11 @@
 import { type RefObject, useEffect, useRef, useState } from "react"
-
 import {
 	SlControlEnd,
 	SlControlPause,
 	SlControlPlay,
 	SlControlStart,
-	SlVolume2,
-	SlVolumeOff,
 } from "react-icons/sl"
-
+import { VolumeSlider } from "../VolumeSilder/VolumeSlider"
 import styles from "./AudioPlayer.module.css"
 
 type Props = {
@@ -129,58 +126,6 @@ function AudioControls({
 			<PrevButton />
 			{isPlaying ? <PauseButton /> : <PlayButton />}
 			<NextButton />
-		</div>
-	)
-}
-
-type VolumeProps = {
-	audioRef: RefObject<HTMLAudioElement | null>
-	volumeRef: RefObject<HTMLInputElement | null>
-	currentTrackUrl?: string
-}
-
-function VolumeSlider({ audioRef, volumeRef, currentTrackUrl }: VolumeProps) {
-	const [muted, setMuted] = useState(false)
-	const [volume, setVolume] = useState(1.0)
-
-	// set the volume of a new track to be the selected volume, instead of default = 1
-	// biome-ignore lint/correctness/useExhaustiveDependencies: re-run when track changes
-	useEffect(() => {
-		const audio = audioRef.current
-		if (audio === null) return
-		audio.volume = muted ? 0 : volume
-	}, [audioRef, currentTrackUrl, muted, volume])
-
-	const handleVolumeChange = () => {
-		const audio = audioRef.current
-		const volume = volumeRef.current
-		if (audio === null || volume === null) return
-
-		audio.volume = volume.valueAsNumber
-		setVolume(volume.valueAsNumber)
-	}
-
-	const handleVolumeButtonClick = () => {
-		setMuted((prev) => !prev)
-	}
-
-	const renderVolumeButton = () =>
-		muted || volume === 0.0 ? <SlVolumeOff /> : <SlVolume2 />
-
-	return (
-		<div>
-			<button onClick={handleVolumeButtonClick} type="button">
-				{renderVolumeButton()}
-			</button>
-			<input
-				defaultValue={0.0}
-				max={1.0}
-				onChange={handleVolumeChange}
-				ref={volumeRef}
-				step={0.01}
-				type="range"
-				value={muted ? 0.0 : volume}
-			/>
 		</div>
 	)
 }
