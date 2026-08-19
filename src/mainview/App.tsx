@@ -4,6 +4,7 @@ import type { TrackFile } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import { AudioPlayer } from "./components/AudioPlayer/AudioPlayer"
 import { useAudioPlayer } from "./player"
+import { useUserSettingsContext } from "./userSettings/userSettingsContext"
 
 type Album = {
 	title: string
@@ -19,18 +20,38 @@ type Props = {
 
 export function App({ rpc }: Props) {
 	const audioRef = useRef<HTMLAudioElement | null>(null)
-
 	const [album, setAlbum] = useState<Album | null>(null)
 
+	const { userSettings, updateUserSettings, isLoaded } =
+		useUserSettingsContext()
+
+	useEffect(() => {
+		async function readFolder(folder: string) {
+			const metadata = await rpc.request.readFolder(folder)
+			console.log("metadata:", metadata)
+			if (!metadata) return
+			const newAlbum: Album = {
+				title: metadata.title,
+				tracks: metadata.tracks,
+			}
+			setAlbum(newAlbum)
+		}
+
+		if (!isLoaded || !userSettings.libraryRoot) return
+
+		readFolder(userSettings.libraryRoot)
+	}, [rpc, isLoaded, userSettings.libraryRoot])
+
 	async function handleClick() {
-		const metadata = await rpc.request.pickFolder()
+		const result = await rpc.request.pickFolder()
+		if (!result) return
+		const { folder, metadata } = result
 		console.log("metadata:", metadata)
-		if (!metadata) return
-		const newAlbum: Album = {
+		updateUserSettings({ libraryRoot: folder })
+		setAlbum({
 			title: metadata.title,
 			tracks: metadata.tracks,
-		}
-		setAlbum(newAlbum)
+		})
 	}
 
 	useEffect(() => {
