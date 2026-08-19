@@ -1,7 +1,9 @@
 import { BrowserView, BrowserWindow, Utils } from "electrobun/bun"
 import type { MyRPC } from "../shared/rpc"
-import { readOrCreateMetadataFile } from "./metadata"
+import type { UserSettings } from "../shared/userSettings"
+import { readMetadataFile, readOrCreateMetadataFile } from "./metadata"
 import { readTrackFile } from "./readTrack"
+import { loadUserSettings, updateUserSettings } from "./userSettings"
 
 let currentFolder: string | null = null
 
@@ -9,6 +11,16 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 	maxRequestTime: Infinity,
 	handlers: {
 		requests: {
+			loadUserSettings: async () => {
+				const loadedSettings = await loadUserSettings()
+				if (loadedSettings.libraryRoot) {
+					currentFolder = loadedSettings.libraryRoot
+				}
+				return loadedSettings
+			},
+			updateUserSettings: async (userSettings: Partial<UserSettings>) => {
+				return await updateUserSettings(userSettings)
+			},
 			pickFolder: async () => {
 				const [folder] = await Utils.openFileDialog({
 					canChooseDirectory: true,
@@ -17,7 +29,11 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 				// user cancelled selection
 				if (!folder) return null
 				currentFolder = folder
-				return await readOrCreateMetadataFile(folder)
+				const metadata = await readOrCreateMetadataFile(folder)
+				return { folder, metadata }
+			},
+			readFolder: async (folder: string) => {
+				return await readMetadataFile(folder)
 			},
 			readTrackFile: async (filename: string) => {
 				if (!currentFolder) return null
