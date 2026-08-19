@@ -2,6 +2,7 @@ import { Electroview } from "electrobun/view"
 import { createRoot } from "react-dom/client"
 import type { MyRPC } from "../shared/rpc"
 import { App } from "./App"
+import { UserSettingsProvider } from "./userSettings/userSettingsContext"
 
 console.log("Hello Electrobun view loaded!")
 
@@ -15,4 +16,8 @@ const rootElement = document.getElementById("root")
 
 if (!rootElement) throw new Error("Missing root element")
 
-createRoot(rootElement).render(<App rpc={rpc} />)
+createRoot(rootElement).render(
+	<UserSettingsProvider rpc={rpc}>
+		<App rpc={rpc} />
+	</UserSettingsProvider>,
+)
