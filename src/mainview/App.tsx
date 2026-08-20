@@ -3,6 +3,13 @@ import { useEffect, useRef, useState } from "react"
 import type { TrackFile } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import { AudioPlayer } from "./components/AudioPlayer/AudioPlayer"
+import {
+	DataCell,
+	HeaderCell,
+	Table,
+	TableHead,
+	TableRow,
+} from "./components/Table/Table"
 import { useAudioPlayer } from "./player"
 import { useUserSettingsContext } from "./userSettings/userSettingsContext"
 
@@ -21,6 +28,7 @@ type Props = {
 export function App({ rpc }: Props) {
 	const audioRef = useRef<HTMLAudioElement | null>(null)
 	const [album, setAlbum] = useState<Album | null>(null)
+	const [currentTrack, setCurrentTrack] = useState<number | null>(null)
 
 	const { userSettings, updateUserSettings, isLoaded } =
 		useUserSettingsContext()
@@ -69,6 +77,7 @@ export function App({ rpc }: Props) {
 	async function handleTrackClick(trackIndex: number) {
 		console.log("Click track number:", trackIndex)
 		playSelectedTrack(trackIndex)
+		setCurrentTrack(trackIndex)
 	}
 
 	return (
@@ -85,15 +94,24 @@ export function App({ rpc }: Props) {
 			{album && (
 				<>
 					<h2>{album.title}</h2>
-					{album.tracks.map((track) => (
-						<button
-							key={track.track}
-							onClick={() => handleTrackClick(track.track)}
-							type="button"
-						>
-							{track.title}
-						</button>
-					))}
+					<Table>
+						<TableHead>
+							<TableRow>
+								<HeaderCell>Track</HeaderCell>
+								<HeaderCell>Title</HeaderCell>
+							</TableRow>
+						</TableHead>
+						{album.tracks.map((track) => (
+							<TableRow
+								key={track.track}
+								onClick={() => handleTrackClick(track.track)}
+								selected={track.track === currentTrack}
+							>
+								<DataCell>{track.track}</DataCell>
+								<DataCell>{track.title}</DataCell>
+							</TableRow>
+						))}
+					</Table>
 				</>
 			)}
 			<AudioPlayer
