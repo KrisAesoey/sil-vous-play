@@ -44,7 +44,7 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 })
 
 // Create the main application window
-const mainWindow = new BrowserWindow({
+const _mainWindow = new BrowserWindow({
 	title: "Hello Electrobun!",
 	url: "views://mainview/index.html",
 	rpc,
@@ -55,7 +55,5 @@ const mainWindow = new BrowserWindow({
 		y: 200,
 	},
 })
-
-mainWindow.webview.openDevTools()
 
 console.log("Hello Electrobun app started!")
