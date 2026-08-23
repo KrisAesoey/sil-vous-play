@@ -1,28 +1,5 @@
 import styles from "./Table.module.css"
 
-/** Expected use of Table components
- * <Table>
- *   <TableHead>
- *     <TableRow>
- *       <HeaderCell>
- *       </HeaderCell>
- *       <HeaderCell>
- *       </HeaderCell>
- *     </TableRow>
- *   </TableHead>
- *   <TableBody>
- *     <TableRow>
- *       <DataCell>
- *       </DataCell>
- *     </TableRow>
- *     <TableRow>
- *       <DataCell>
- *       </DataCell>
- *     </TableRow>
- *   </TableBody>
- * </Table>
- */
-
 type TableProps = {
 	children: React.ReactNode
 }
@@ -44,7 +21,7 @@ type TableBodyProps = {
 }
 
 export function TableBody({ children }: TableBodyProps) {
-	return <tbody>{children}</tbody>
+	return <tbody className={styles.body}>{children}</tbody>
 }
 
 type TableRowProps = {
