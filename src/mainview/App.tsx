@@ -2,11 +2,13 @@ import type { Electroview } from "electrobun/view"
 import { useEffect, useRef, useState } from "react"
 import type { TrackFile } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
+import styles from "./App.module.css"
 import { AudioPlayer } from "./components/AudioPlayer/AudioPlayer"
 import {
 	DataCell,
 	HeaderCell,
 	Table,
+	TableBody,
 	TableHead,
 	TableRow,
 } from "./components/Table/Table"
@@ -81,39 +83,42 @@ export function App({ rpc }: Props) {
 	}
 
 	return (
-		<div className="container">
-			<h1>Hello Electrobun! 🎉</h1>
+		<div className={styles.container}>
 			{/* biome-ignore lint/a11y/useMediaCaption: music playback, no dialogue/lyrics to caption */}
 			<audio ref={audioRef} preload="auto" key={currentTrackUrl}>
 				<source src={currentTrackUrl} type={currentTrackType} />
 				Your device does not support the audio element.
 			</audio>
-			<button id="load-folder" onClick={handleClick} type="button">
-				LOAD FOLDER
-			</button>
-			{album && (
-				<>
-					<h2>{album.title}</h2>
-					<Table>
-						<TableHead>
-							<TableRow>
-								<HeaderCell>Track</HeaderCell>
-								<HeaderCell>Title</HeaderCell>
-							</TableRow>
-						</TableHead>
-						{album.tracks.map((track) => (
-							<TableRow
-								key={track.track}
-								onClick={() => handleTrackClick(track.track)}
-								selected={track.track === currentTrack}
-							>
-								<DataCell>{track.track}</DataCell>
-								<DataCell>{track.title}</DataCell>
-							</TableRow>
-						))}
-					</Table>
-				</>
-			)}
+			<div className={styles.content}>
+				<button id="load-folder" onClick={handleClick} type="button">
+					LOAD FOLDER
+				</button>
+				{album && (
+					<>
+						<h2>{album.title}</h2>
+						<Table>
+							<TableHead>
+								<TableRow>
+									<HeaderCell>Track</HeaderCell>
+									<HeaderCell>Title</HeaderCell>
+								</TableRow>
+							</TableHead>
+							<TableBody>
+								{album.tracks.map((track) => (
+									<TableRow
+										key={track.track}
+										onClick={() => handleTrackClick(track.track)}
+										selected={track.track === currentTrack}
+									>
+										<DataCell>{track.track}</DataCell>
+										<DataCell>{track.title}</DataCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</>
+				)}
+			</div>
 			<AudioPlayer
 				audioRef={audioRef}
 				currentTrackUrl={currentTrackUrl}
