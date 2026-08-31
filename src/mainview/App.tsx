@@ -1,5 +1,5 @@
 import type { Electroview } from "electrobun/view"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import type { TrackFile } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import styles from "./App.module.css"
@@ -12,6 +12,7 @@ import {
 	TableHead,
 	TableRow,
 } from "./components/Table/Table"
+import { usePlaybackContext } from "./playback/playbackContext"
 import { useAudioPlayer } from "./player"
 import { useUserSettingsContext } from "./userSettings/userSettingsContext"
 
@@ -29,11 +30,16 @@ type Props = {
 
 export function App({ rpc }: Props) {
 	const audioRef = useRef<HTMLAudioElement | null>(null)
-	const [album, setAlbum] = useState<Album | null>(null)
-	const [currentTrack, setCurrentTrack] = useState<number | null>(null)
 
 	const { userSettings, updateUserSettings, isLoaded } =
 		useUserSettingsContext()
+
+	const {
+		currentAlbum,
+		setCurrentAlbum,
+		currentTrackIndex,
+		setCurrentTrackIndex,
+	} = usePlaybackContext()
 
 	useEffect(() => {
 		async function readFolder(folder: string) {
@@ -44,13 +50,13 @@ export function App({ rpc }: Props) {
 				title: metadata.title,
 				tracks: metadata.tracks,
 			}
-			setAlbum(newAlbum)
+			setCurrentAlbum(newAlbum)
 		}
 
 		if (!isLoaded || !userSettings.libraryRoot) return
 
 		readFolder(userSettings.libraryRoot)
-	}, [rpc, isLoaded, userSettings.libraryRoot])
+	}, [rpc, isLoaded, setCurrentAlbum, userSettings.libraryRoot])
 
 	async function handleClick() {
 		const result = await rpc.request.pickFolder()
@@ -58,15 +64,11 @@ export function App({ rpc }: Props) {
 		const { folder, metadata } = result
 		console.log("metadata:", metadata)
 		updateUserSettings({ libraryRoot: folder })
-		setAlbum({
+		setCurrentAlbum({
 			title: metadata.title,
 			tracks: metadata.tracks,
 		})
 	}
-
-	useEffect(() => {
-		console.log(album)
-	}, [album])
 
 	const {
 		currentTrackType,
@@ -74,12 +76,15 @@ export function App({ rpc }: Props) {
 		playSelectedTrack,
 		playPrevTrack,
 		playNextTrack,
-	} = useAudioPlayer({ rpc, trackList: album?.tracks ?? [] })
+	} = useAudioPlayer({
+		rpc,
+		trackList: currentAlbum?.tracks ?? [],
+		onTrackChange: setCurrentTrackIndex,
+	})
 
 	async function handleTrackClick(trackIndex: number) {
 		console.log("Click track number:", trackIndex)
 		playSelectedTrack(trackIndex)
-		setCurrentTrack(trackIndex)
 	}
 
 	return (
@@ -93,9 +98,9 @@ export function App({ rpc }: Props) {
 				<button id="load-folder" onClick={handleClick} type="button">
 					LOAD FOLDER
 				</button>
-				{album && (
+				{currentAlbum && (
 					<>
-						<h2>{album.title}</h2>
+						<h2>{currentAlbum.title}</h2>
 						<Table>
 							<TableHead>
 								<TableRow>
@@ -104,11 +109,11 @@ export function App({ rpc }: Props) {
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{album.tracks.map((track) => (
+								{currentAlbum.tracks.map((track) => (
 									<TableRow
 										key={track.track}
 										onClick={() => handleTrackClick(track.track)}
-										selected={track.track === currentTrack}
+										selected={track.track === currentTrackIndex}
 									>
 										<DataCell>{track.track}</DataCell>
 										<DataCell>{track.title}</DataCell>

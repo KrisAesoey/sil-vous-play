@@ -12,6 +12,7 @@ const MIME_BY_FORMAT: Record<AudioFileFormat, string> = {
 type Props = {
 	rpc: ReturnType<typeof Electroview.defineRPC<MyRPC>>
 	trackList: TrackFile[]
+	onTrackChange?: (newTrack: number) => void
 }
 
 type UseAdioPlayer = {
@@ -22,7 +23,11 @@ type UseAdioPlayer = {
 	playNextTrack: () => void
 }
 
-export function useAudioPlayer({ rpc, trackList }: Props): UseAdioPlayer {
+export function useAudioPlayer({
+	rpc,
+	trackList,
+	onTrackChange,
+}: Props): UseAdioPlayer {
 	const currentTrackIndex = useRef(0)
 
 	const [currentTrackUrl, setCurrentTrackUrl] = useState<string | undefined>()
@@ -66,6 +71,10 @@ export function useAudioPlayer({ rpc, trackList }: Props): UseAdioPlayer {
 		}
 
 		currentTrackIndex.current = index
+
+		if (onTrackChange) {
+			onTrackChange(selectedTrack.track)
+		}
 
 		// avoid memory leaking old blob URLs when new ones are fetched
 		if (currentTrackUrl) {
