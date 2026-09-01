@@ -5,8 +5,6 @@ import { App } from "./App"
 import { PlaybackProvider } from "./playback/playbackContext"
 import { UserSettingsProvider } from "./userSettings/userSettingsContext"
 
-console.log("Hello Electrobun view loaded!")
-
 const rpc = Electroview.defineRPC<MyRPC>({
 	maxRequestTime: Infinity,
 	handlers: {},
