@@ -1,11 +1,11 @@
 import { BrowserView, BrowserWindow, Utils } from "electrobun/bun"
 import type { MyRPC } from "../shared/rpc"
 import type { UserSettings } from "../shared/userSettings"
-import { readMetadataFile, readOrCreateMetadataFile } from "./metadata"
+import { loadAlbums } from "./metadata/albums"
+import { loadLibrary } from "./metadata/library"
+import { readOrCreateLibraryMetadata } from "./metadata/scanner"
 import { readTrackFile } from "./readTrack"
 import { loadUserSettings, updateUserSettings } from "./userSettings"
-
-let currentFolder: string | null = null
 
 const rpc = BrowserView.defineRPC<MyRPC>({
 	maxRequestTime: Infinity,
@@ -13,9 +13,6 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 		requests: {
 			loadUserSettings: async () => {
 				const loadedSettings = await loadUserSettings()
-				if (loadedSettings.libraryRoot) {
-					currentFolder = loadedSettings.libraryRoot
-				}
 				return loadedSettings
 			},
 			updateUserSettings: async (userSettings: Partial<UserSettings>) => {
@@ -28,16 +25,17 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 				})
 				// user cancelled selection
 				if (!folder) return null
-				currentFolder = folder
-				const metadata = await readOrCreateMetadataFile(folder)
+				const metadata = await readOrCreateLibraryMetadata(folder)
 				return { folder, metadata }
 			},
-			readFolder: async (folder: string) => {
-				return await readMetadataFile(folder)
+			loadAlbums: async (dirs: string[]) => {
+				return await loadAlbums(dirs)
 			},
-			readTrackFile: async (filename: string) => {
-				if (!currentFolder) return null
-				return await readTrackFile(currentFolder, filename)
+			loadLibrary: async (dir: string) => {
+				return await loadLibrary(dir)
+			},
+			readTrackFile: async ({ directory, filename }) => {
+				return await readTrackFile(directory, filename)
 			},
 		},
 	},
