@@ -3,16 +3,9 @@ import { useEffect, useRef, useState } from "react"
 import type { AlbumEntry } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import styles from "./App.module.css"
+import { Album } from "./components/Album/Album"
 import { AlbumList } from "./components/AlbumList/AlbumList"
 import { AudioPlayer } from "./components/AudioPlayer/AudioPlayer"
-import {
-	DataCell,
-	HeaderCell,
-	Table,
-	TableBody,
-	TableHead,
-	TableRow,
-} from "./components/Table/Table"
 import { usePlaybackContext } from "./playback/playbackContext"
 import { useAudioPlayer } from "./player"
 import { useUserSettingsContext } from "./userSettings/userSettingsContext"
@@ -101,29 +94,11 @@ export function App({ rpc }: Props) {
 					<AlbumList albums={albums} onAlbumSelect={handleAlbumSelect} />
 				</div>
 				{currentAlbum && (
-					<div className={styles.album}>
-						<h2>{currentAlbum.album.title}</h2>
-						<Table>
-							<TableHead>
-								<TableRow>
-									<HeaderCell>Track</HeaderCell>
-									<HeaderCell>Title</HeaderCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{currentAlbum.album.tracks.map((track) => (
-									<TableRow
-										key={track.track}
-										onClick={() => handleTrackClick(track.track)}
-										selected={track.track === currentTrackIndex}
-									>
-										<DataCell>{track.track}</DataCell>
-										<DataCell>{track.title}</DataCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</div>
+					<Album
+						album={currentAlbum.album}
+						onTrackSelect={handleTrackClick}
+						selectedTrack={currentTrackIndex}
+					/>
 				)}
 			</div>
 			<AudioPlayer
