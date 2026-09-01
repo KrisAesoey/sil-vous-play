@@ -6,3 +6,9 @@
 	color: white;
 	padding: 1rem;
 }
+
+.container {
+	display: flex;
+	flex-direction: row;
+	gap: 2rem;
+}
