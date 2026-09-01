@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { useDebounce } from "../../debounce"
-import { useUserSettingsContext } from "../../userSettings/userSettingsContext"
+import { useDebounce } from "../../../debounce"
+import { useUserSettingsContext } from "../../../userSettings/userSettingsContext"
 
 export function usePersistedVolume() {
 	const {

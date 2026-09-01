@@ -2,17 +2,13 @@ import { type RefObject, useEffect } from "react"
 import { SlVolume2, SlVolumeOff } from "react-icons/sl"
 import { usePersistedVolume } from "./usePersistedVolume"
 
-type VolumeProps = {
+type Props = {
 	audioRef: RefObject<HTMLAudioElement | null>
 	volumeRef: RefObject<HTMLInputElement | null>
 	currentTrackUrl?: string
 }
 
-export function VolumeSlider({
-	audioRef,
-	volumeRef,
-	currentTrackUrl,
-}: VolumeProps) {
+export function VolumeSlider({ audioRef, volumeRef, currentTrackUrl }: Props) {
 	const { volume, setVolume, muted, toggleMute } = usePersistedVolume()
 
 	// set the volume of a new track to be the selected volume, instead of default = 1
