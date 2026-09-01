@@ -43,7 +43,7 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 
 // Create the main application window
 const _mainWindow = new BrowserWindow({
-	title: "Hello Electrobun!",
+	title: "S'il vous play",
 	url: "views://mainview/index.html",
 	rpc,
 	frame: {
@@ -53,5 +53,3 @@ const _mainWindow = new BrowserWindow({
 		y: 200,
 	},
 })
-
-console.log("Hello Electrobun app started!")
