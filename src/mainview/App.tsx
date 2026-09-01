@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import type { AlbumEntry } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import styles from "./App.module.css"
+import { AlbumList } from "./components/AlbumList/AlbumList"
 import { AudioPlayer } from "./components/AudioPlayer/AudioPlayer"
 import {
 	DataCell,
@@ -97,15 +98,7 @@ export function App({ rpc }: Props) {
 					<button id="load-folder" onClick={handleClick} type="button">
 						LOAD FOLDER
 					</button>
-					{albums?.map((albumEntry) => (
-						<button
-							key={albumEntry.album.title}
-							onClick={() => handleAlbumSelect(albumEntry)}
-							type="button"
-						>
-							<p>{albumEntry.album.title}</p>
-						</button>
-					))}
+					<AlbumList albums={albums} onAlbumSelect={handleAlbumSelect} />
 				</div>
 				{currentAlbum && (
 					<div className={styles.album}>
