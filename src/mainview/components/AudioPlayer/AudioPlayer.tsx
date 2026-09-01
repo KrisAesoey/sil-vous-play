@@ -144,12 +144,21 @@ function ProgressBar({
 	const [timeProgress, setTimeProgress] = useState(0)
 	const [duration, setDuration] = useState(0)
 
+	const isDraggingRef = useRef(false)
+
+	const handleDrag = () => {
+		const progressBar = progressBarRef.current
+		if (progressBar === null) return
+		isDraggingRef.current = true
+		setTimeProgress(progressBar.valueAsNumber) // visual update only
+	}
+
 	const handleProgressChange = () => {
 		const audio = audioRef.current
 		const progressBar = progressBarRef.current
 		if (audio === null || progressBar === null) return
 		audio.currentTime = progressBar.valueAsNumber
-		setTimeProgress(progressBar.valueAsNumber)
+		isDraggingRef.current = false
 	}
 
 	// // Update the progress and duration of a track based on audio events
@@ -158,7 +167,10 @@ function ProgressBar({
 		const audio = audioRef.current
 		if (audio === null) return
 
-		const updateProgress = () => setTimeProgress(audio.currentTime)
+		const updateProgress = () => {
+			// only update the audio progress if the user stops dragging
+			if (!isDraggingRef.current) setTimeProgress(audio.currentTime)
+		}
 		const updateDuration = () => setDuration(audio.duration)
 
 		audio.addEventListener("timeupdate", updateProgress)
@@ -177,7 +189,8 @@ function ProgressBar({
 			<input
 				defaultValue={0}
 				max={duration}
-				onChange={handleProgressChange}
+				onChange={handleDrag}
+				onPointerUp={handleProgressChange}
 				ref={progressBarRef}
 				type="range"
 				value={timeProgress}
