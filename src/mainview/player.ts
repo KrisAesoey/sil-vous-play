@@ -18,7 +18,7 @@ type Props = {
 type UseAdioPlayer = {
 	currentTrackUrl: string | undefined
 	currentTrackType: string | undefined
-	playSelectedTrack: (trackIndex: number) => void
+	playSelectedTrack: (dir: string, trackIndex: number) => void
 	playPrevTrack: () => void
 	playNextTrack: () => void
 }
@@ -28,6 +28,7 @@ export function useAudioPlayer({
 	trackList,
 	onTrackChange,
 }: Props): UseAdioPlayer {
+	const currentDir = useRef("")
 	const currentTrackIndex = useRef(0)
 
 	const [currentTrackUrl, setCurrentTrackUrl] = useState<string | undefined>()
@@ -36,12 +37,13 @@ export function useAudioPlayer({
 	>()
 
 	async function fetchAudioFile(
+		directory: string,
 		filename: string,
 		fileExt: AudioFileFormat,
 	): Promise<{ trackUrl: string; mimeType: string } | null> {
 		const mimeType = MIME_BY_FORMAT[fileExt]
 
-		const track = await rpc.request.readTrackFile(filename)
+		const track = await rpc.request.readTrackFile({ directory, filename })
 		if (!track) return null
 
 		const base64Track = atob(track)
@@ -64,7 +66,11 @@ export function useAudioPlayer({
 		preloadCache.current.delete(index)
 
 		const audioFile = await (pending ??
-			fetchAudioFile(selectedTrack.file, selectedTrack.format))
+			fetchAudioFile(
+				currentDir.current,
+				selectedTrack.file,
+				selectedTrack.format,
+			))
 		if (!audioFile) {
 			console.log("Could not load audioFile from Bun:", selectedTrack.file)
 			return
@@ -89,7 +95,8 @@ export function useAudioPlayer({
 		console.log("Preloaded neighbors for current track:", index)
 	}
 
-	function playSelectedTrack(trackNumber: number) {
+	function playSelectedTrack(dir: string, trackNumber: number) {
+		currentDir.current = dir
 		const index = trackList.findIndex((t) => t.track === trackNumber)
 		if (index === -1) return
 		loadTrackAt(index)
@@ -112,7 +119,11 @@ export function useAudioPlayer({
 		const track = trackList[index]
 		if (!track || preloadCache.current.has(index)) return
 
-		const audioFile = fetchAudioFile(track.file, track.format)
+		const audioFile = fetchAudioFile(
+			currentDir.current,
+			track.file,
+			track.format,
+		)
 		preloadCache.current.set(index, audioFile)
 
 		audioFile.then((result) => {

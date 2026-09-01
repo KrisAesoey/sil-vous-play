@@ -1,5 +1,5 @@
 import type { RPCSchema } from "electrobun"
-import type { Metadata } from "./audio"
+import type { AlbumEntry, LibraryMetadata, Metadata } from "./audio"
 import type { UserSettings } from "./userSettings"
 
 export type MyRPC = {
@@ -18,12 +18,19 @@ export type MyRPC = {
 				params: undefined
 				response: { folder: string; metadata: Metadata } | null
 			}
-			readFolder: {
+			loadAlbums: {
+				params: string[]
+				response: AlbumEntry[]
+			}
+			loadLibrary: {
 				params: string
-				response: Metadata | null
+				response: LibraryMetadata | null
 			}
 			readTrackFile: {
-				params: string
+				params: {
+					directory: string
+					filename: string
+				}
 				response: string | null
 			}
 		}

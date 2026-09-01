@@ -1,6 +1,6 @@
 import type { Electroview } from "electrobun/view"
-import { useEffect, useRef } from "react"
-import type { TrackFile } from "../shared/audio"
+import { useEffect, useRef, useState } from "react"
+import type { AlbumEntry } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import styles from "./App.module.css"
 import { AudioPlayer } from "./components/AudioPlayer/AudioPlayer"
@@ -15,14 +15,6 @@ import {
 import { usePlaybackContext } from "./playback/playbackContext"
 import { useAudioPlayer } from "./player"
 import { useUserSettingsContext } from "./userSettings/userSettingsContext"
-
-type Album = {
-	title: string
-	tracks: TrackFile[]
-	artist?: string
-	artwork?: string
-	year?: string
-}
 
 type Props = {
 	rpc: ReturnType<typeof Electroview.defineRPC<MyRPC>>
@@ -41,21 +33,25 @@ export function App({ rpc }: Props) {
 		setCurrentTrackIndex,
 	} = usePlaybackContext()
 
+	const [albums, setAlbums] = useState<AlbumEntry[]>()
+
 	useEffect(() => {
-		async function readFolder(folder: string) {
-			const metadata = await rpc.request.readFolder(folder)
-			console.log("metadata:", metadata)
-			if (!metadata) return
-			const newAlbum: Album = {
-				title: metadata.title,
-				tracks: metadata.tracks,
+		async function loadLibrary(dir: string) {
+			const library = await rpc.request.loadLibrary(dir)
+			console.log("library data:", library)
+			if (!library) return
+
+			const albumEntries = await rpc.request.loadAlbums(library.albumPaths)
+
+			if (albumEntries.length > 0) {
+				setAlbums(albumEntries)
+				setCurrentAlbum(albumEntries[0])
 			}
-			setCurrentAlbum(newAlbum)
 		}
 
 		if (!isLoaded || !userSettings.libraryRoot) return
 
-		readFolder(userSettings.libraryRoot)
+		loadLibrary(userSettings.libraryRoot)
 	}, [rpc, isLoaded, setCurrentAlbum, userSettings.libraryRoot])
 
 	async function handleClick() {
@@ -64,10 +60,6 @@ export function App({ rpc }: Props) {
 		const { folder, metadata } = result
 		console.log("metadata:", metadata)
 		updateUserSettings({ libraryRoot: folder })
-		setCurrentAlbum({
-			title: metadata.title,
-			tracks: metadata.tracks,
-		})
 	}
 
 	const {
@@ -78,13 +70,19 @@ export function App({ rpc }: Props) {
 		playNextTrack,
 	} = useAudioPlayer({
 		rpc,
-		trackList: currentAlbum?.tracks ?? [],
+		trackList: currentAlbum?.album.tracks ?? [],
 		onTrackChange: setCurrentTrackIndex,
 	})
 
 	async function handleTrackClick(trackIndex: number) {
 		console.log("Click track number:", trackIndex)
-		playSelectedTrack(trackIndex)
+		if (currentAlbum) {
+			playSelectedTrack(currentAlbum.dir, trackIndex)
+		}
+	}
+
+	function handleAlbumSelect(album: AlbumEntry) {
+		setCurrentAlbum(album)
 	}
 
 	return (
@@ -95,12 +93,23 @@ export function App({ rpc }: Props) {
 				Your device does not support the audio element.
 			</audio>
 			<div className={styles.content}>
-				<button id="load-folder" onClick={handleClick} type="button">
-					LOAD FOLDER
-				</button>
+				<div className={styles.library}>
+					<button id="load-folder" onClick={handleClick} type="button">
+						LOAD FOLDER
+					</button>
+					{albums?.map((albumEntry) => (
+						<button
+							key={albumEntry.album.title}
+							onClick={() => handleAlbumSelect(albumEntry)}
+							type="button"
+						>
+							<p>{albumEntry.album.title}</p>
+						</button>
+					))}
+				</div>
 				{currentAlbum && (
-					<>
-						<h2>{currentAlbum.title}</h2>
+					<div className={styles.album}>
+						<h2>{currentAlbum.album.title}</h2>
 						<Table>
 							<TableHead>
 								<TableRow>
@@ -109,7 +118,7 @@ export function App({ rpc }: Props) {
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{currentAlbum.tracks.map((track) => (
+								{currentAlbum.album.tracks.map((track) => (
 									<TableRow
 										key={track.track}
 										onClick={() => handleTrackClick(track.track)}
@@ -121,7 +130,7 @@ export function App({ rpc }: Props) {
 								))}
 							</TableBody>
 						</Table>
-					</>
+					</div>
 				)}
 			</div>
 			<AudioPlayer
