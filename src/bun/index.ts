@@ -42,7 +42,7 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 })
 
 // Create the main application window
-const _mainWindow = new BrowserWindow({
+new BrowserWindow({
 	title: "S'il vous play",
 	url: "views://mainview/index.html",
 	rpc,
