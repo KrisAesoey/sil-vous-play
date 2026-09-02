@@ -3,8 +3,9 @@
 	"version": "1.0.0",
 	"description": "A player for your local music library",
 	"scripts": {
-		"start": "electrobun dev",
-		"dev": "electrobun dev --watch"
+		"build": "electrobun build",
+		"dev": "electrobun dev --watch",
+		"start": "electrobun dev"
 	},
 	"dependencies": {
 		"electrobun": "1.18.1",
@@ -17,6 +18,7 @@
 		"@biomejs/biome": "2.5.9",
 		"@types/bun": "latest",
 		"@types/react": "^19.2.18",
-		"@types/react-dom": "^19.2.4"
+		"@types/react-dom": "^19.2.4",
+		"typescript": "^7.0.2"
 	}
 }
