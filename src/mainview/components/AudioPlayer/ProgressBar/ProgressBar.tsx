@@ -1,5 +1,9 @@
 import { type RefObject, useEffect, useRef, useState } from "react"
 
+import { Text } from "../../typography/Text/Text"
+
+import styles from "./ProgressBar.module.css"
+
 type Props = {
 	audioRef: RefObject<HTMLAudioElement | null>
 	progressBarRef: RefObject<HTMLInputElement | null>
@@ -54,9 +58,12 @@ export function ProgressBar({
 	}, [audioRef, currentTrackUrl])
 
 	return (
-		<div>
-			<span>{formatTime(timeProgress)}</span>
+		<div className={styles.container}>
+			<Text as="span" size="md" weight="regular">
+				{formatTime(timeProgress)}
+			</Text>
 			<input
+				className={styles.bar}
 				defaultValue={0}
 				max={duration}
 				onChange={handleDrag}
@@ -65,7 +72,9 @@ export function ProgressBar({
 				type="range"
 				value={timeProgress}
 			/>
-			<span>{formatTime(duration)}</span>
+			<Text as="span" size="md">
+				{formatTime(duration)}
+			</Text>
 		</div>
 	)
 }
