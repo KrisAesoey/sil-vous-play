@@ -1,6 +1,8 @@
 import { type RefObject, useEffect } from "react"
-import { SlVolume2, SlVolumeOff } from "react-icons/sl"
+import { IoVolumeMedium, IoVolumeMute } from "react-icons/io5"
+import { IconButton } from "../../IconButton/IconButton"
 import { usePersistedVolume } from "./usePersistedVolume"
+import styles from "./VolumeSlider.module.css"
 
 type Props = {
 	audioRef: RefObject<HTMLAudioElement | null>
@@ -26,13 +28,13 @@ export function VolumeSlider({ audioRef, volumeRef, currentTrackUrl }: Props) {
 	}
 
 	const renderVolumeButton = () =>
-		muted || volume === 0.0 ? <SlVolumeOff /> : <SlVolume2 />
+		muted || volume === 0.0 ? <IoVolumeMute /> : <IoVolumeMedium />
 
 	return (
-		<div>
-			<button onClick={toggleMute} type="button">
+		<div className={styles.container}>
+			<IconButton onClick={toggleMute} variant="primary">
 				{renderVolumeButton()}
-			</button>
+			</IconButton>
 			<input
 				defaultValue={0.0}
 				max={1.0}
