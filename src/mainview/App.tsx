@@ -82,7 +82,12 @@ export function App({ rpc }: Props) {
 	return (
 		<div className={styles.container}>
 			{/* biome-ignore lint/a11y/useMediaCaption: music playback, no dialogue/lyrics to caption */}
-			<audio ref={audioRef} preload="auto" key={currentTrackUrl}>
+			<audio
+				className={styles.hiddenAudio}
+				ref={audioRef}
+				preload="auto"
+				key={currentTrackUrl}
+			>
 				<source src={currentTrackUrl} type={currentTrackType} />
 				Your device does not support the audio element.
 			</audio>
@@ -93,13 +98,15 @@ export function App({ rpc }: Props) {
 					</button>
 					<AlbumList albums={albums} onAlbumSelect={handleAlbumSelect} />
 				</div>
-				{currentAlbum && (
-					<Album
-						album={currentAlbum.album}
-						onTrackSelect={handleTrackClick}
-						selectedTrack={currentTrackIndex}
-					/>
-				)}
+				<div className={styles.display}>
+					{currentAlbum && (
+						<Album
+							album={currentAlbum.album}
+							onTrackSelect={handleTrackClick}
+							selectedTrack={currentTrackIndex}
+						/>
+					)}
+				</div>
 			</div>
 			<AudioPlayer
 				audioRef={audioRef}
