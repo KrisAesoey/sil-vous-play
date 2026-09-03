@@ -13,9 +13,9 @@ export default {
 			},
 		},
 		copy: {
+			"src/mainview/assets": "views/mainview/assets",
 			"src/mainview/index.tsx": "views/mainview/index.tsx",
 			"src/mainview/index.html": "views/mainview/index.html",
-			"src/mainview/index.css": "views/mainview/index.css",
 		},
 		mac: {
 			bundleCEF: false,
