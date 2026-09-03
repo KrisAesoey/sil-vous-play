@@ -5,6 +5,8 @@ import { App } from "./App"
 import { PlaybackProvider } from "./playback/playbackContext"
 import { UserSettingsProvider } from "./userSettings/userSettingsContext"
 
+import "./index.css"
+
 const rpc = Electroview.defineRPC<MyRPC>({
 	maxRequestTime: Infinity,
 	handlers: {},
