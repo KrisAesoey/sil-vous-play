@@ -1,11 +1,11 @@
 import { type RefObject, useEffect, useState } from "react"
 import {
-	SlControlEnd,
-	SlControlPause,
-	SlControlPlay,
-	SlControlStart,
-} from "react-icons/sl"
-
+	IoPause,
+	IoPlay,
+	IoPlaySkipBack,
+	IoPlaySkipForward,
+} from "react-icons/io5"
+import { IconButton } from "../../IconButton/IconButton"
 import styles from "./Controls.module.css"
 
 type Props = {
@@ -36,15 +36,15 @@ export function Controls({
 	}
 
 	const PlayButton = () => (
-		<button className={styles.button} onClick={togglePlayPause} type="button">
-			<SlControlPlay />
-		</button>
+		<IconButton onClick={togglePlayPause} variant="ghost">
+			<IoPlay />
+		</IconButton>
 	)
 
 	const PauseButton = () => (
-		<button className={styles.button} onClick={togglePlayPause} type="button">
-			<SlControlPause />
-		</button>
+		<IconButton onClick={togglePlayPause} variant="ghost">
+			<IoPause />
+		</IconButton>
 	)
 
 	function handleRewind() {
@@ -58,9 +58,9 @@ export function Controls({
 	}
 
 	const PrevButton = () => (
-		<button className={styles.button} onClick={handleRewind} type="button">
-			<SlControlStart />
-		</button>
+		<IconButton onClick={handleRewind} variant="ghost">
+			<IoPlaySkipBack />
+		</IconButton>
 	)
 
 	function handleForward() {
@@ -69,9 +69,9 @@ export function Controls({
 	}
 
 	const NextButton = () => (
-		<button className={styles.button} onClick={handleForward} type="button">
-			<SlControlEnd />
-		</button>
+		<IconButton onClick={handleForward} variant="ghost">
+			<IoPlaySkipForward />
+		</IconButton>
 	)
 
 	return (
