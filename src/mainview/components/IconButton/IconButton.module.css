@@ -1,0 +1,17 @@
+.button {
+	align-items: center;
+	border-radius: 100%;
+	border-width: 0;
+	display: flex;
+	justify-content: center;
+}
+
+.ghost {
+	background-color: transparent;
+	color: var(--color-button-primary);
+}
+
+.primary {
+	background-color: var(--color-button-primary);
+	color: var(--color-background-primary);
+}
