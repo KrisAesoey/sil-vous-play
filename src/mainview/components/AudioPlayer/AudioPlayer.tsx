@@ -1,4 +1,5 @@
 import { type RefObject, useEffect, useRef } from "react"
+import styles from "./AudioPlayer.module.css"
 import { Controls } from "./Controls/Controls"
 import { ProgressBar } from "./ProgressBar/ProgressBar"
 import { VolumeSlider } from "./VolumeSilder/VolumeSlider"
@@ -29,7 +30,12 @@ export function AudioPlayer({
 	}, [audioRef, currentTrackUrl, playNextTrack])
 
 	return (
-		<div>
+		<div className={styles.container}>
+			<VolumeSlider
+				audioRef={audioRef}
+				currentTrackUrl={currentTrackUrl}
+				volumeRef={volumeRef}
+			/>
 			<Controls
 				audioRef={audioRef}
 				currentTrackUrl={currentTrackUrl}
@@ -40,11 +46,6 @@ export function AudioPlayer({
 				audioRef={audioRef}
 				currentTrackUrl={currentTrackUrl}
 				progressBarRef={progressBarRef}
-			/>
-			<VolumeSlider
-				audioRef={audioRef}
-				currentTrackUrl={currentTrackUrl}
-				volumeRef={volumeRef}
 			/>
 		</div>
 	)
