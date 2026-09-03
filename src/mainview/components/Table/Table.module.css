@@ -2,10 +2,6 @@
 	overflow-y: scroll;
 }
 
-.selectedRow {
-	background-color: lightgreen;
-}
-
 .dataCell {
 	overflow: hidden;
 	text-overflow: ellipsis;

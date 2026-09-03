@@ -27,19 +27,10 @@ export function TableBody({ children }: TableBodyProps) {
 type TableRowProps = {
 	children: React.ReactNode
 	onClick?: () => void
-	selected?: boolean
 }
 
-export function TableRow({
-	children,
-	onClick,
-	selected = false,
-}: TableRowProps) {
-	return (
-		<tr onClick={onClick} className={selected ? styles.selectedRow : ""}>
-			{children}
-		</tr>
-	)
+export function TableRow({ children, onClick }: TableRowProps) {
+	return <tr onClick={onClick}>{children}</tr>
 }
 
 type HeaderCellProps = {
