@@ -1,4 +1,6 @@
 import type { AlbumEntry } from "../../../shared/audio"
+import { Button } from "../Button/Button"
+import { Text } from "../typography/Text/Text"
 import styles from "./AlbumList.module.css"
 
 type Props = {
@@ -10,13 +12,15 @@ export function AlbumList({ albums, onAlbumSelect }: Props) {
 	return (
 		<div className={styles.list}>
 			{albums?.map((albumEntry) => (
-				<button
+				<Button
 					key={albumEntry.album.title}
 					onClick={() => onAlbumSelect(albumEntry)}
 					type="button"
 				>
-					<p>{albumEntry.album.title}</p>
-				</button>
+					<Text size="md" weight="regular">
+						{albumEntry.album.title}
+					</Text>
+				</Button>
 			))}
 		</div>
 	)

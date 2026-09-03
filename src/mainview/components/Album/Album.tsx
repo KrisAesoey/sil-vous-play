@@ -1,4 +1,5 @@
 import type { AlbumMetadata } from "../../../shared/audio"
+import { usePlaybackContext } from "../../playback/playbackContext"
 import {
 	DataCell,
 	HeaderCell,
@@ -7,6 +8,9 @@ import {
 	TableHead,
 	TableRow,
 } from "../Table/Table"
+import { Heading } from "../typography/Heading/Heading"
+
+import { Text } from "../typography/Text/Text"
 
 import styles from "./Album.module.css"
 
@@ -17,14 +21,31 @@ type Props = {
 }
 
 export function Album({ album, onTrackSelect, selectedTrack }: Props) {
+	const { currentAlbum } = usePlaybackContext()
+
+	function isSelectedTrack(track: number): boolean {
+		if (!currentAlbum) return false
+		return currentAlbum.album === album && track === selectedTrack
+	}
+
 	return (
 		<div className={styles.album}>
-			<h2>{album.title}</h2>
+			<Heading as="h1" size="md">
+				{album.title}
+			</Heading>
 			<Table>
 				<TableHead>
 					<TableRow>
-						<HeaderCell>Track</HeaderCell>
-						<HeaderCell>Title</HeaderCell>
+						<HeaderCell>
+							<Heading as="h2" size="sm">
+								Track
+							</Heading>
+						</HeaderCell>
+						<HeaderCell>
+							<Heading as="h2" size="sm">
+								Title
+							</Heading>
+						</HeaderCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
@@ -32,10 +53,29 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 						<TableRow
 							key={track.track}
 							onClick={() => onTrackSelect(track.track)}
-							selected={track.track === selectedTrack}
 						>
-							<DataCell>{track.track}</DataCell>
-							<DataCell>{track.title}</DataCell>
+							<DataCell>
+								<Text
+									size="md"
+									variant={
+										isSelectedTrack(track.track) ? "highlight" : undefined
+									}
+									weight="regular"
+								>
+									{track.track}
+								</Text>
+							</DataCell>
+							<DataCell>
+								<Text
+									size="md"
+									variant={
+										isSelectedTrack(track.track) ? "highlight" : undefined
+									}
+									weight="regular"
+								>
+									{track.title}
+								</Text>
+							</DataCell>
 						</TableRow>
 					))}
 				</TableBody>
