@@ -42,14 +42,22 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 })
 
 // Create the main application window
-new BrowserWindow({
+const window = new BrowserWindow({
 	title: "S'il vous play",
 	url: "views://mainview/index.html",
 	rpc,
 	frame: {
 		width: 800,
-		height: 800,
-		x: 200,
-		y: 200,
+		height: 600,
+		x: 100,
+		y: 60,
 	},
+})
+
+// hack to make the view actually reload when the dom is ready to get the audio player
+// to appear inside the browser frame
+window.webview.on("dom-ready", () => {
+	const { width, height } = window.getFrame()
+	window.setSize(width + 1, height)
+	window.setSize(width, height)
 })
