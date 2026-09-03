@@ -1,0 +1,16 @@
+.heading {
+	color: var(--color-typography-primary);
+	margin: 0;
+}
+
+.sm {
+	font-size: 1.5rem;
+}
+
+.md {
+	font-size: 2rem;
+}
+
+.lg {
+	font-size: 3rem;
+}
