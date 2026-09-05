@@ -26,11 +26,29 @@ export function TableBody({ children }: TableBodyProps) {
 
 type TableRowProps = {
 	children: React.ReactNode
+	highlight?: boolean
 	onClick?: () => void
 }
 
-export function TableRow({ children, onClick }: TableRowProps) {
-	return <tr onClick={onClick}>{children}</tr>
+export function TableRow({
+	children,
+	onClick,
+	highlight = false,
+}: TableRowProps) {
+	const style = highlight ? styles.highlight : ""
+
+	return (
+		<tr
+			className={style}
+			onClick={onClick}
+			onKeyDown={(e) => {
+				if (e.key === "Enter") onClick?.()
+			}}
+			tabIndex={0}
+		>
+			{children}
+		</tr>
+	)
 }
 
 type HeaderCellProps = {
