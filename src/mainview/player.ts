@@ -11,25 +11,24 @@ const MIME_BY_FORMAT: Record<AudioFileFormat, string> = {
 
 type Props = {
 	rpc: ReturnType<typeof Electroview.defineRPC<MyRPC>>
-	trackList: TrackFile[]
-	onTrackChange?: (newTrack: number) => void
+	onTrackChange?: (newDir: string, newTrack: number) => void
 }
 
 type UseAdioPlayer = {
 	currentTrackUrl: string | undefined
 	currentTrackType: string | undefined
-	playSelectedTrack: (dir: string, trackIndex: number) => void
+	playSelectedTrack: (
+		dir: string,
+		trackList: TrackFile[],
+		trackIndex: number,
+	) => void
 	playPrevTrack: () => void
 	playNextTrack: () => void
 }
 
-export function useAudioPlayer({
-	rpc,
-	trackList,
-	onTrackChange,
-}: Props): UseAdioPlayer {
-	const currentDir = useRef("")
-	const currentTrackIndex = useRef(0)
+export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAdioPlayer {
+	const trackList = useRef<{ dir: string; tracks: TrackFile[] }>(undefined)
+	const loadedIndex = useRef(0)
 
 	const [currentTrackUrl, setCurrentTrackUrl] = useState<string | undefined>()
 	const [currentTrackType, setCurrentTrackTypeUrl] = useState<
@@ -55,7 +54,10 @@ export function useAudioPlayer({
 	}
 
 	async function loadTrackAt(index: number) {
-		const selectedTrack = trackList[index]
+		const album = trackList.current
+		if (!album) return
+
+		const selectedTrack = album.tracks[index]
 		if (!selectedTrack) {
 			console.log("Could not find selected track:", index)
 			return
@@ -66,20 +68,16 @@ export function useAudioPlayer({
 		preloadCache.current.delete(index)
 
 		const audioFile = await (pending ??
-			fetchAudioFile(
-				currentDir.current,
-				selectedTrack.file,
-				selectedTrack.format,
-			))
+			fetchAudioFile(album.dir, selectedTrack.file, selectedTrack.format))
 		if (!audioFile) {
 			console.log("Could not load audioFile from Bun:", selectedTrack.file)
 			return
 		}
 
-		currentTrackIndex.current = index
+		loadedIndex.current = index
 
 		if (onTrackChange) {
-			onTrackChange(selectedTrack.track)
+			onTrackChange(album.dir, selectedTrack.track)
 		}
 
 		// avoid memory leaking old blob URLs when new ones are fetched
@@ -95,19 +93,25 @@ export function useAudioPlayer({
 		console.log("Preloaded neighbors for current track:", index)
 	}
 
-	function playSelectedTrack(dir: string, trackNumber: number) {
-		currentDir.current = dir
-		const index = trackList.findIndex((t) => t.track === trackNumber)
+	function playSelectedTrack(
+		dir: string,
+		tracks: TrackFile[],
+		trackNumber: number,
+	) {
+		trackList.current = { dir, tracks }
+		const index = tracks.findIndex((t) => t.track === trackNumber)
 		if (index === -1) return
 		loadTrackAt(index)
 	}
 
 	function playPrevTrack() {
-		loadTrackAt(getPrevIndex(currentTrackIndex.current, trackList.length))
+		const len = trackList.current?.tracks.length ?? 0
+		loadTrackAt(getPrevIndex(loadedIndex.current, len))
 	}
 
 	function playNextTrack() {
-		loadTrackAt(getNextIndex(currentTrackIndex.current, trackList.length))
+		const len = trackList.current?.tracks.length ?? 0
+		loadTrackAt(getNextIndex(loadedIndex.current, len))
 	}
 
 	// store a cache of preloaded tracks that the user can easily navigate to
@@ -116,14 +120,13 @@ export function useAudioPlayer({
 	)
 
 	function preloadTrackAt(index: number) {
-		const track = trackList[index]
+		const album = trackList.current
+		if (!album) return
+
+		const track = album.tracks[index]
 		if (!track || preloadCache.current.has(index)) return
 
-		const audioFile = fetchAudioFile(
-			currentDir.current,
-			track.file,
-			track.format,
-		)
+		const audioFile = fetchAudioFile(album.dir, track.file, track.format)
 		preloadCache.current.set(index, audioFile)
 
 		audioFile.then((result) => {
@@ -132,8 +135,9 @@ export function useAudioPlayer({
 	}
 
 	function preloadNeighbors(index: number) {
-		const prevIndex = getPrevIndex(index, trackList.length)
-		const nextIndex = getNextIndex(index, trackList.length)
+		const len = trackList.current?.tracks.length ?? 0
+		const prevIndex = getPrevIndex(index, len)
+		const nextIndex = getNextIndex(index, len)
 		preloadTrackAt(prevIndex)
 		preloadTrackAt(nextIndex)
 
