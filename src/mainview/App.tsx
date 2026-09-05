@@ -20,14 +20,27 @@ export function App({ rpc }: Props) {
 	const { userSettings, updateUserSettings, isLoaded } =
 		useUserSettingsContext()
 
-	const {
-		currentAlbum,
-		setCurrentAlbum,
-		currentTrackIndex,
-		setCurrentTrackIndex,
-	} = usePlaybackContext()
-
 	const [albums, setAlbums] = useState<AlbumEntry[]>()
+
+	const [viewingAlbum, setViewingAlbum] = useState<AlbumEntry>()
+	const [selectedTrack, setSelectedTrack] = useState<number | undefined>()
+	const { setNowPlaying } = usePlaybackContext()
+
+	function handleAlbumSelect(album: AlbumEntry) {
+		setViewingAlbum(album)
+		setSelectedTrack(undefined) // clear selection from old album
+	}
+
+	function handleTrackSelect(trackNumber: number) {
+		if (viewingAlbum && trackNumber === selectedTrack) {
+			playSelectedTrack(
+				viewingAlbum.dir,
+				viewingAlbum?.album.tracks ?? [],
+				trackNumber,
+			)
+		}
+		setSelectedTrack(trackNumber)
+	}
 
 	useEffect(() => {
 		async function loadLibrary(dir: string) {
@@ -39,21 +52,26 @@ export function App({ rpc }: Props) {
 
 			if (albumEntries.length > 0) {
 				setAlbums(albumEntries)
-				setCurrentAlbum(albumEntries[0])
+				setViewingAlbum(albumEntries[0])
 			}
 		}
 
 		if (!isLoaded || !userSettings.libraryRoot) return
 
 		loadLibrary(userSettings.libraryRoot)
-	}, [rpc, isLoaded, setCurrentAlbum, userSettings.libraryRoot])
+	}, [rpc, isLoaded, userSettings.libraryRoot])
 
-	async function handleClick() {
+	async function handleLibrarySelect() {
 		const result = await rpc.request.pickFolder()
 		if (!result) return
 		const { folder, metadata } = result
 		console.log("metadata:", metadata)
 		updateUserSettings({ libraryRoot: folder })
+	}
+
+	function handleTrackChange(albumDir: string, trackNumber: number) {
+		setNowPlaying({ albumDir, trackNumber })
+		setSelectedTrack(undefined)
 	}
 
 	const {
@@ -64,20 +82,8 @@ export function App({ rpc }: Props) {
 		playNextTrack,
 	} = useAudioPlayer({
 		rpc,
-		trackList: currentAlbum?.album.tracks ?? [],
-		onTrackChange: setCurrentTrackIndex,
+		onTrackChange: handleTrackChange,
 	})
-
-	async function handleTrackClick(trackIndex: number) {
-		console.log("Click track number:", trackIndex)
-		if (currentAlbum) {
-			playSelectedTrack(currentAlbum.dir, trackIndex)
-		}
-	}
-
-	function handleAlbumSelect(album: AlbumEntry) {
-		setCurrentAlbum(album)
-	}
 
 	return (
 		<div className={styles.container}>
@@ -93,17 +99,17 @@ export function App({ rpc }: Props) {
 			</audio>
 			<div className={styles.content}>
 				<div className={styles.library}>
-					<button id="load-folder" onClick={handleClick} type="button">
+					<button id="load-folder" onClick={handleLibrarySelect} type="button">
 						LOAD FOLDER
 					</button>
 					<AlbumList albums={albums} onAlbumSelect={handleAlbumSelect} />
 				</div>
 				<div className={styles.display}>
-					{currentAlbum && (
+					{viewingAlbum && (
 						<Album
-							album={currentAlbum.album}
-							onTrackSelect={handleTrackClick}
-							selectedTrack={currentTrackIndex}
+							album={viewingAlbum}
+							onTrackSelect={handleTrackSelect}
+							selectedTrack={selectedTrack}
 						/>
 					)}
 				</div>
