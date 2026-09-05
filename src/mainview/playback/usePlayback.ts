@@ -1,21 +1,16 @@
 import { useState } from "react"
-import type { AlbumEntry } from "../../shared/audio"
 
+export type NowPlaying = { albumDir: string; trackNumber: number }
 export type UsePlayback = {
-	currentAlbum: AlbumEntry | undefined
-	setCurrentAlbum: (newAlbum: AlbumEntry) => void
-	currentTrackIndex: number | undefined
-	setCurrentTrackIndex: (newTrackIndex: number) => void
+	nowPlaying: NowPlaying | undefined
+	setNowPlaying: (newPlaying: NowPlaying) => void
 }
 
 export function usePlayback(): UsePlayback {
-	const [currentAlbum, setCurrentAlbum] = useState<AlbumEntry>()
-	const [currentTrackIndex, setCurrentTrackIndex] = useState<number>()
+	const [nowPlaying, setNowPlaying] = useState<NowPlaying>()
 
 	return {
-		currentAlbum,
-		setCurrentAlbum,
-		currentTrackIndex,
-		setCurrentTrackIndex,
+		nowPlaying,
+		setNowPlaying,
 	}
 }
