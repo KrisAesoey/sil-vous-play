@@ -1,4 +1,4 @@
-import type { AlbumMetadata } from "../../../shared/audio"
+import type { AlbumEntry } from "../../../shared/audio"
 import { usePlaybackContext } from "../../playback/playbackContext"
 import {
 	DataCell,
@@ -15,23 +15,23 @@ import { Text } from "../typography/Text/Text"
 import styles from "./Album.module.css"
 
 type Props = {
-	album: AlbumMetadata
+	album: AlbumEntry
 	onTrackSelect: (track: number) => void
 	selectedTrack: number | undefined
 }
 
 export function Album({ album, onTrackSelect, selectedTrack }: Props) {
-	const { currentAlbum } = usePlaybackContext()
+	const { nowPlaying } = usePlaybackContext()
 
-	function isSelectedTrack(track: number): boolean {
-		if (!currentAlbum) return false
-		return currentAlbum.album === album && track === selectedTrack
-	}
+	const isPlaying = (track: number) =>
+		nowPlaying?.albumDir === album.dir && nowPlaying.trackNumber === track
+
+	const isSelected = (track: number) => track === selectedTrack
 
 	return (
 		<div className={styles.album}>
 			<Heading as="h1" size="md">
-				{album.title}
+				{album.album.title}
 			</Heading>
 			<Table>
 				<TableHead>
@@ -49,17 +49,16 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{album.tracks.map((track) => (
+					{album.album.tracks.map((track) => (
 						<TableRow
 							key={track.track}
 							onClick={() => onTrackSelect(track.track)}
+							highlight={isSelected(track.track)}
 						>
 							<DataCell>
 								<Text
 									size="md"
-									variant={
-										isSelectedTrack(track.track) ? "highlight" : undefined
-									}
+									variant={isPlaying(track.track) ? "highlight" : undefined}
 									weight="regular"
 								>
 									{track.track}
@@ -68,9 +67,7 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 							<DataCell>
 								<Text
 									size="md"
-									variant={
-										isSelectedTrack(track.track) ? "highlight" : undefined
-									}
+									variant={isPlaying(track.track) ? "highlight" : undefined}
 									weight="regular"
 								>
 									{track.title}
