@@ -29,6 +29,7 @@ textarea {
 body {
 	--color-background-primary: #17173d;
 	--color-background-secondary: #172a47;
+	--color-background-highlight: #37375d;
 	--color-button-primary: #0fb7d9;
 	--color-typography-primary: #ededed;
 }

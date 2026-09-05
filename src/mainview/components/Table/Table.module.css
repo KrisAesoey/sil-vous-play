@@ -7,3 +7,7 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
+.highlight {
+	background-color: var(--color-background-highlight);
+}
