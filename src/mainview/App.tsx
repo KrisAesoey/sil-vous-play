@@ -1,5 +1,5 @@
 import type { Electroview } from "electrobun/view"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import type { AlbumEntry } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import styles from "./App.module.css"
@@ -15,8 +15,6 @@ type Props = {
 }
 
 export function App({ rpc }: Props) {
-	const audioRef = useRef<HTMLAudioElement | null>(null)
-
 	const { userSettings, updateUserSettings, isLoaded } =
 		useUserSettingsContext()
 
@@ -24,7 +22,7 @@ export function App({ rpc }: Props) {
 
 	const [viewingAlbum, setViewingAlbum] = useState<AlbumEntry>()
 	const [selectedTrack, setSelectedTrack] = useState<number | undefined>()
-	const { setNowPlaying } = usePlaybackContext()
+	const { play: setNowPlaying } = usePlaybackContext()
 
 	function handleAlbumSelect(album: AlbumEntry) {
 		setViewingAlbum(album)
@@ -87,16 +85,6 @@ export function App({ rpc }: Props) {
 
 	return (
 		<div className={styles.container}>
-			{/* biome-ignore lint/a11y/useMediaCaption: music playback, no dialogue/lyrics to caption */}
-			<audio
-				className={styles.hiddenAudio}
-				ref={audioRef}
-				preload="auto"
-				key={currentTrackUrl}
-			>
-				<source src={currentTrackUrl} type={currentTrackType} />
-				Your device does not support the audio element.
-			</audio>
 			<div className={styles.content}>
 				<div className={styles.library}>
 					<button id="load-folder" onClick={handleLibrarySelect} type="button">
@@ -115,8 +103,8 @@ export function App({ rpc }: Props) {
 				</div>
 			</div>
 			<AudioPlayer
-				audioRef={audioRef}
 				currentTrackUrl={currentTrackUrl}
+				currentTrackType={currentTrackType}
 				playNextTrack={playNextTrack}
 				playPrevTrack={playPrevTrack}
 			/>

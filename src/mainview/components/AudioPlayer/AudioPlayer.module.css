@@ -1,3 +1,8 @@
+.hiddenAudio {
+	display: none;
+	height: 0;
+}
+
 .container {
 	align-items: center;
 	display: flex;
