@@ -11,7 +11,7 @@ const TrackFileSchema = z.object({
 	file: z.string(),
 	title: z.string(),
 	format: AudioFileFormatSchema,
-	track: z.number(),
+	trackNumber: z.number(),
 })
 
 const BaseMetadataScehma = z.object({
