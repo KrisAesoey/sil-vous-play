@@ -57,7 +57,7 @@ function createAlbumMetadata(
 	albumPath: string,
 	entries: Dirent[],
 ): AlbumMetadata {
-	let trackIndex = 0
+	let trackNumber = 0
 
 	const trackFiles: TrackFile[] = entries.flatMap((entry): TrackFile[] => {
 		if (entry.isDirectory()) return []
@@ -65,14 +65,14 @@ function createAlbumMetadata(
 		const ext = getFileExtension(entry)
 		if (!isAudioFileFormat(ext)) return []
 
-		trackIndex += 1
+		trackNumber += 1
 
 		return [
 			{
 				file: entry.name,
 				title: entry.name,
 				format: ext,
-				track: trackIndex,
+				trackNumber,
 			},
 		]
 	})

@@ -51,23 +51,27 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 				<TableBody>
 					{album.album.tracks.map((track) => (
 						<TableRow
-							key={track.track}
-							onClick={() => onTrackSelect(track.track)}
-							highlight={isSelected(track.track)}
+							key={track.trackNumber}
+							onClick={() => onTrackSelect(track.trackNumber)}
+							highlight={isSelected(track.trackNumber)}
 						>
 							<DataCell>
 								<Text
 									size="md"
-									variant={isPlaying(track.track) ? "highlight" : undefined}
+									variant={
+										isPlaying(track.trackNumber) ? "highlight" : undefined
+									}
 									weight="regular"
 								>
-									{track.track}
+									{track.trackNumber}
 								</Text>
 							</DataCell>
 							<DataCell>
 								<Text
 									size="md"
-									variant={isPlaying(track.track) ? "highlight" : undefined}
+									variant={
+										isPlaying(track.trackNumber) ? "highlight" : undefined
+									}
 									weight="regular"
 								>
 									{track.title}

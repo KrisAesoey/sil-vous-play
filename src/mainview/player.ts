@@ -77,7 +77,7 @@ export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAdioPlayer {
 		loadedIndex.current = index
 
 		if (onTrackChange) {
-			onTrackChange(album.dir, selectedTrack.track)
+			onTrackChange(album.dir, selectedTrack.trackNumber)
 		}
 
 		// avoid memory leaking old blob URLs when new ones are fetched
@@ -99,7 +99,7 @@ export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAdioPlayer {
 		trackNumber: number,
 	) {
 		trackList.current = { dir, tracks }
-		const index = tracks.findIndex((t) => t.track === trackNumber)
+		const index = tracks.findIndex((t) => t.trackNumber === trackNumber)
 		if (index === -1) return
 		loadTrackAt(index)
 	}
