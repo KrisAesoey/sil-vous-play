@@ -28,6 +28,10 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 
 	const isSelected = (track: number) => track === selectedTrack
 
+	const tracks = album.album.tracks.toSorted(
+		(t1, t2) => t1.trackNumber - t2.trackNumber,
+	)
+
 	return (
 		<div className={styles.album}>
 			<Heading as="h1" size="md">
@@ -49,9 +53,9 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{album.album.tracks.map((track) => (
+					{tracks.map((track) => (
 						<TableRow
-							key={track.trackNumber}
+							key={`${track.trackNumber}-${track.file}`}
 							onClick={() => onTrackSelect(track.trackNumber)}
 							highlight={isSelected(track.trackNumber)}
 						>
@@ -77,10 +81,30 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 									{track.title}
 								</Text>
 							</DataCell>
+							<DataCell>
+								<Text size="md" weight="regular">
+									{formatTime(track.duration)}
+								</Text>
+							</DataCell>
 						</TableRow>
 					))}
 				</TableBody>
 			</Table>
 		</div>
 	)
+}
+
+function formatTime(time: number): string {
+	const minutes = Math.floor(time / 60)
+	const formatMinutes = minutes <= 0 ? "00" : `${minutes}`
+
+	const seconds = Math.floor(time % 60)
+	const formatSeconds = () => {
+		if (seconds <= 0) {
+			return "00"
+		}
+		return seconds < 10 ? `0${seconds}` : `${seconds}`
+	}
+
+	return `${formatMinutes}:${formatSeconds()}`
 }
