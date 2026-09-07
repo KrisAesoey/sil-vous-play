@@ -11,6 +11,7 @@ import {
 	type TrackFile,
 } from "../../shared/audio"
 import { METADATA_FILENAME } from "./config"
+import { getTrackMetadata } from "./tracks"
 
 function isAudioFileFormat(value: string): value is AudioFileFormat {
 	return (AUDIO_FILE_FORMATS as readonly string[]).includes(value)
@@ -53,29 +54,25 @@ async function writeMetadataFile(dir: string, metadata: Metadata) {
 	await Bun.write(metadataPath, JSON.stringify(metadata, null, 2))
 }
 
-function createAlbumMetadata(
+async function createAlbumMetadata(
 	albumPath: string,
 	entries: Dirent[],
-): AlbumMetadata {
+): Promise<AlbumMetadata> {
 	let trackNumber = 0
 
-	const trackFiles: TrackFile[] = entries.flatMap((entry): TrackFile[] => {
-		if (entry.isDirectory()) return []
+	const trackFiles: TrackFile[] = (
+		await Promise.all(
+			entries.map((entry) => {
+				if (entry.isDirectory()) return null
 
-		const ext = getFileExtension(entry)
-		if (!isAudioFileFormat(ext)) return []
+				const ext = getFileExtension(entry)
+				if (!isAudioFileFormat(ext)) return null
 
-		trackNumber += 1
-
-		return [
-			{
-				file: entry.name,
-				title: entry.name,
-				format: ext,
-				trackNumber,
-			},
-		]
-	})
+				trackNumber += 1
+				return getTrackMetadata(albumPath, entry, ext, trackNumber)
+			}),
+		)
+	).filter((track): track is TrackFile => track !== null)
 
 	return {
 		title: path.basename(albumPath),
@@ -92,7 +89,7 @@ async function scanDirectory(dir: string): Promise<string[]> {
 
 	const existing = await readMetadataFile(dir)
 	if (!existing) {
-		await writeMetadataFile(dir, createAlbumMetadata(dir, entries))
+		await writeMetadataFile(dir, await createAlbumMetadata(dir, entries))
 	}
 
 	const subDirs = entries.filter((entry) => entry.isDirectory())

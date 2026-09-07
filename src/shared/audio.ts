@@ -8,9 +8,10 @@ export type AudioFileFormat = (typeof AUDIO_FILE_FORMATS)[number]
 const AudioFileFormatSchema = z.enum(AUDIO_FILE_FORMATS)
 
 const TrackFileSchema = z.object({
+	duration: z.number(),
 	file: z.string(),
-	title: z.string(),
 	format: AudioFileFormatSchema,
+	title: z.string(),
 	trackNumber: z.number(),
 })
 
