@@ -1,0 +1,8 @@
+.settings {
+	display: flex;
+	flex-direction: row;
+}
+
+.icon {
+	color: var(--color-typography-primary);
+}

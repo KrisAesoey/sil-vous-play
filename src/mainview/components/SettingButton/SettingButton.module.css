@@ -1,0 +1,7 @@
+.button {
+	align-items: center;
+	background-color: var(--color-background-secondary);
+	border-width: 0;
+	display: flex;
+	justify-content: center;
+}
