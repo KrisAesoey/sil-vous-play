@@ -1,11 +1,12 @@
 import type { Electroview } from "electrobun/view"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import type { AlbumEntry } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import styles from "./App.module.css"
 import { Album } from "./components/Album/Album"
 import { AlbumList } from "./components/AlbumList/AlbumList"
 import { AudioPlayer } from "./components/AudioPlayer/AudioPlayer"
+import { Settings } from "./components/Settings/Settings"
 import { usePlaybackContext } from "./playback/playbackContext"
 import { useAudioPlayer } from "./player"
 import { useUserSettingsContext } from "./userSettings/userSettingsContext"
@@ -15,8 +16,7 @@ type Props = {
 }
 
 export function App({ rpc }: Props) {
-	const { userSettings, updateUserSettings, isLoaded } =
-		useUserSettingsContext()
+	const { userSettings, isLoaded } = useUserSettingsContext()
 
 	const [albums, setAlbums] = useState<AlbumEntry[]>()
 
@@ -40,10 +40,9 @@ export function App({ rpc }: Props) {
 		setSelectedTrack(trackNumber)
 	}
 
-	useEffect(() => {
-		async function loadLibrary(dir: string) {
+	const loadLibrary = useCallback(
+		async (dir: string) => {
 			const library = await rpc.request.loadLibrary(dir)
-			console.log("library data:", library)
 			if (!library) return
 
 			const albumEntries = await rpc.request.loadAlbums(library.albumPaths)
@@ -52,20 +51,16 @@ export function App({ rpc }: Props) {
 				setAlbums(albumEntries)
 				setViewingAlbum(albumEntries[0])
 			}
-		}
+		},
+		[rpc],
+	)
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: only trigger on initial load
+	useEffect(() => {
 		if (!isLoaded || !userSettings.libraryRoot) return
 
 		loadLibrary(userSettings.libraryRoot)
-	}, [rpc, isLoaded, userSettings.libraryRoot])
-
-	async function handleLibrarySelect() {
-		const result = await rpc.request.pickFolder()
-		if (!result) return
-		const { folder, metadata } = result
-		console.log("metadata:", metadata)
-		updateUserSettings({ libraryRoot: folder })
-	}
+	}, [isLoaded])
 
 	function handleTrackChange(albumDir: string, trackNumber: number) {
 		setNowPlaying({ albumDir, trackNumber })
@@ -87,9 +82,7 @@ export function App({ rpc }: Props) {
 		<div className={styles.container}>
 			<div className={styles.content}>
 				<div className={styles.library}>
-					<button id="load-folder" onClick={handleLibrarySelect} type="button">
-						LOAD FOLDER
-					</button>
+					<Settings loadLibrary={loadLibrary} rpc={rpc} />
 					<AlbumList albums={albums} onAlbumSelect={handleAlbumSelect} />
 				</div>
 				<div className={styles.display}>
