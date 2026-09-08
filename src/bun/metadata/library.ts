@@ -2,6 +2,7 @@ import path from "node:path"
 
 import { type LibraryMetadata, LibraryMetadataSchema } from "../../shared/audio"
 import { METADATA_FILENAME } from "./config"
+import { createLibraryMetadata } from "./scanner"
 
 export async function loadLibrary(
 	dir: string,
@@ -21,4 +22,8 @@ export async function loadLibrary(
 		return null
 	}
 	return metadata.data
+}
+
+export async function refreshLibrary(dir: string): Promise<LibraryMetadata> {
+	return await createLibraryMetadata(dir)
 }

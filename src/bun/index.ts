@@ -2,7 +2,7 @@ import { BrowserView, BrowserWindow, Utils } from "electrobun/bun"
 import type { MyRPC } from "../shared/rpc"
 import type { UserSettings } from "../shared/userSettings"
 import { loadAlbums } from "./metadata/albums"
-import { loadLibrary } from "./metadata/library"
+import { loadLibrary, refreshLibrary } from "./metadata/library"
 import { readOrCreateLibraryMetadata } from "./metadata/scanner"
 import { readTrackFile } from "./readTrack"
 import { loadUserSettings, updateUserSettings } from "./userSettings"
@@ -18,21 +18,24 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 			updateUserSettings: async (userSettings: Partial<UserSettings>) => {
 				return await updateUserSettings(userSettings)
 			},
-			pickFolder: async () => {
-				const [folder] = await Utils.openFileDialog({
-					canChooseDirectory: true,
-					canChooseFiles: false,
-				})
-				// user cancelled selection
-				if (!folder) return null
-				const metadata = await readOrCreateLibraryMetadata(folder)
-				return { folder, metadata }
-			},
 			loadAlbums: async (dirs: string[]) => {
 				return await loadAlbums(dirs)
 			},
 			loadLibrary: async (dir: string) => {
 				return await loadLibrary(dir)
+			},
+			refreshLibrary: async (dir: string) => {
+				return await refreshLibrary(dir)
+			},
+			selectLibrary: async () => {
+				const [dir] = await Utils.openFileDialog({
+					canChooseDirectory: true,
+					canChooseFiles: false,
+				})
+				// user cancelled selection
+				if (!dir) return null
+				const metadata = await readOrCreateLibraryMetadata(dir)
+				return { dir, metadata }
 			},
 			readTrackFile: async ({ directory, filename }) => {
 				return await readTrackFile(directory, filename)

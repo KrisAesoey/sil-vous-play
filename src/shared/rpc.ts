@@ -14,10 +14,6 @@ export type MyRPC = {
 				params: Partial<UserSettings>
 				response: UserSettings
 			}
-			pickFolder: {
-				params: undefined
-				response: { folder: string; metadata: Metadata } | null
-			}
 			loadAlbums: {
 				params: string[]
 				response: AlbumEntry[]
@@ -25,6 +21,14 @@ export type MyRPC = {
 			loadLibrary: {
 				params: string
 				response: LibraryMetadata | null
+			}
+			refreshLibrary: {
+				params: string
+				response: LibraryMetadata
+			}
+			selectLibrary: {
+				params: undefined
+				response: { dir: string; metadata: Metadata } | null
 			}
 			readTrackFile: {
 				params: {
