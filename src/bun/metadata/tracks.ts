@@ -1,15 +1,6 @@
 import type { Dirent } from "node:fs"
 import path from "node:path"
 import { parseFile } from "music-metadata"
-import {
-	AUDIO_FILE_FORMATS,
-	type AudioFileFormat,
-	type TrackFile,
-} from "../../shared/audio"
-
-function isAudioFileFormat(value: string): value is AudioFileFormat {
-	return (AUDIO_FILE_FORMATS as readonly string[]).includes(value)
-}
 
 type TrackMetadata = {
 	container?: string
@@ -29,33 +20,24 @@ async function parseAudioMetadata(filePath: string): Promise<TrackMetadata> {
 	}
 }
 
-export async function getTrackMetadata(
+export type AudioTags = {
+	duration: number
+	trackNumber: number | null
+	container?: string
+	title?: string
+}
+
+export async function getAudioTags(
 	dir: string,
 	entry: Dirent,
-	ext: AudioFileFormat,
-	albumNumber: number,
-): Promise<TrackFile | null> {
+): Promise<AudioTags> {
 	const filePath = path.join(dir, entry.name)
 	const audioMetadata = await parseAudioMetadata(filePath)
 
-	const duration = audioMetadata.duration ?? 0
-	const title = audioMetadata.title ?? path.parse(entry.name).name
-	const trackNumber =
-		audioMetadata.trackNumber != null ? audioMetadata.trackNumber : albumNumber
-
-	const format = () => {
-		const metadataFormat = audioMetadata.container
-		if (!metadataFormat || !isAudioFileFormat(metadataFormat)) {
-			return ext
-		}
-		return metadataFormat
-	}
-
 	return {
-		duration,
-		file: entry.name,
-		title,
-		format: format(),
-		trackNumber,
+		container: audioMetadata.container,
+		duration: audioMetadata.duration ?? 0,
+		trackNumber: audioMetadata.trackNumber,
+		title: audioMetadata.title,
 	}
 }
