@@ -2,24 +2,13 @@ import type { Dirent } from "node:fs"
 import { readdir } from "node:fs/promises"
 import path from "node:path"
 import {
-	type AlbumMetadata,
-	AUDIO_FILE_FORMATS,
-	type AudioFileFormat,
 	type LibraryMetadata,
 	type Metadata,
 	MetadataSchema,
-	type TrackFile,
 } from "../../shared/audio"
+import { createAlbumMetadata } from "./albums"
 import { METADATA_FILENAME } from "./config"
-import { getTrackMetadata } from "./tracks"
-
-function isAudioFileFormat(value: string): value is AudioFileFormat {
-	return (AUDIO_FILE_FORMATS as readonly string[]).includes(value)
-}
-
-function getFileExtension(file: Dirent): string {
-	return path.extname(file.name).slice(1).toLowerCase()
-}
+import { getFileExtension, isAudioFileFormat } from "./utils"
 
 function includeDirectory(entries: Dirent[]) {
 	const hasAudioFiles = entries.some((entry) => {
@@ -52,34 +41,6 @@ async function readMetadataFile(dir: string): Promise<Metadata | null> {
 async function writeMetadataFile(dir: string, metadata: Metadata) {
 	const metadataPath = path.join(dir, METADATA_FILENAME)
 	await Bun.write(metadataPath, JSON.stringify(metadata, null, 2))
-}
-
-async function createAlbumMetadata(
-	albumPath: string,
-	entries: Dirent[],
-): Promise<AlbumMetadata> {
-	let trackNumber = 0
-
-	const trackFiles: TrackFile[] = (
-		await Promise.all(
-			entries.map((entry) => {
-				if (entry.isDirectory()) return null
-
-				const ext = getFileExtension(entry)
-				if (!isAudioFileFormat(ext)) return null
-
-				trackNumber += 1
-				return getTrackMetadata(albumPath, entry, ext, trackNumber)
-			}),
-		)
-	).filter((track): track is TrackFile => track !== null)
-
-	return {
-		title: path.basename(albumPath),
-		tracks: trackFiles,
-		type: "album",
-		version: 1,
-	}
 }
 
 async function scanDirectory(dir: string): Promise<string[]> {
