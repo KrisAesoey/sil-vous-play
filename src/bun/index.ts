@@ -1,6 +1,7 @@
 import { BrowserView, BrowserWindow, Utils } from "electrobun/bun"
 import type { MyRPC } from "../shared/rpc"
 import type { UserSettings } from "../shared/userSettings"
+import { loadCovers } from "./loadCovers"
 import { loadAlbums } from "./metadata/albums"
 import { loadLibrary, refreshLibrary } from "./metadata/library"
 import { readOrCreateLibraryMetadata } from "./metadata/scanner"
@@ -39,6 +40,9 @@ const rpc = BrowserView.defineRPC<MyRPC>({
 			},
 			readTrackFile: async ({ directory, filename }) => {
 				return await readTrackFile(directory, filename)
+			},
+			loadCovers: async (albumPaths: string[]) => {
+				return await loadCovers(albumPaths)
 			},
 		},
 	},
