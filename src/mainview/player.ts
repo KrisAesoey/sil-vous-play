@@ -2,6 +2,7 @@ import type { Electroview } from "electrobun/view"
 import { useRef, useState } from "react"
 import type { AudioFileFormat, TrackFile } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
+import { useQueueContext } from "./queue/queueContext"
 
 const MIME_BY_FORMAT: Record<AudioFileFormat, string> = {
 	flac: "audio/flac",
@@ -14,7 +15,7 @@ type Props = {
 	onTrackChange?: (newDir: string, newTrack: number) => void
 }
 
-type UseAdioPlayer = {
+type UseAudioPlayer = {
 	currentTrackUrl: string | undefined
 	currentTrackType: string | undefined
 	playSelectedTrack: (
@@ -26,7 +27,9 @@ type UseAdioPlayer = {
 	playNextTrack: () => void
 }
 
-export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAdioPlayer {
+export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAudioPlayer {
+	const { queue, head: queueHead, dequeue } = useQueueContext()
+
 	const trackList = useRef<{ dir: string; tracks: TrackFile[] }>(undefined)
 	const loadedIndex = useRef(0)
 
@@ -63,21 +66,25 @@ export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAdioPlayer {
 			return
 		}
 
+		loadedIndex.current = index
+		loadTrack(album.dir, selectedTrack)
+	}
+
+	async function loadTrack(dir: string, track: TrackFile) {
 		// check if we have the file preloaded in the cache before we fetch it
-		const pending = preloadCache.current.get(index)
-		preloadCache.current.delete(index)
+		const cacheKey = getCacheKey(dir, track)
+		const pending = preloadCache.current.get(cacheKey)
+		preloadCache.current.delete(cacheKey)
 
 		const audioFile = await (pending ??
-			fetchAudioFile(album.dir, selectedTrack.file, selectedTrack.format))
+			fetchAudioFile(dir, track.file, track.format))
 		if (!audioFile) {
-			console.log("Could not load audioFile from Bun:", selectedTrack.file)
+			console.log("Could not load audioFile from Bun:", track.file)
 			return
 		}
 
-		loadedIndex.current = index
-
 		if (onTrackChange) {
-			onTrackChange(album.dir, selectedTrack.trackNumber)
+			onTrackChange(dir, track.trackNumber)
 		}
 
 		// avoid memory leaking old blob URLs when new ones are fetched
@@ -87,10 +94,10 @@ export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAdioPlayer {
 
 		setCurrentTrackUrl(audioFile.trackUrl)
 		setCurrentTrackTypeUrl(audioFile.mimeType)
-		console.log("Successfully update track to:", selectedTrack.title)
+		console.log("Successfully update track to:", track.title)
 
-		preloadNeighbors(index)
-		console.log("Preloaded neighbors for current track:", index)
+		preloadNeighbors()
+		console.log("Preloaded neighbors for current track:", cacheKey)
 	}
 
 	function playSelectedTrack(
@@ -110,44 +117,64 @@ export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAdioPlayer {
 	}
 
 	function playNextTrack() {
+		// TODO (race-condition): Can experience stale reference causing dequeue without ever playing next track
+		if (queueHead) {
+			dequeue()
+			loadTrack(queueHead.dir, queueHead.track)
+			return
+		}
+
 		const len = trackList.current?.tracks.length ?? 0
 		loadTrackAt(getNextIndex(loadedIndex.current, len))
 	}
 
 	// store a cache of preloaded tracks that the user can easily navigate to
 	const preloadCache = useRef(
-		new Map<number, Promise<{ trackUrl: string; mimeType: string } | null>>(),
+		new Map<string, Promise<{ trackUrl: string; mimeType: string } | null>>(),
 	)
 
-	function preloadTrackAt(index: number) {
+	function preloadNeighbors() {
 		const album = trackList.current
-		if (!album) return
-
-		const track = album.tracks[index]
-		if (!track || preloadCache.current.has(index)) return
-
-		const audioFile = fetchAudioFile(album.dir, track.file, track.format)
-		preloadCache.current.set(index, audioFile)
-
-		audioFile.then((result) => {
-			if (!result) preloadCache.current.delete(index)
-		})
-	}
-
-	function preloadNeighbors(index: number) {
 		const len = trackList.current?.tracks.length ?? 0
-		const prevIndex = getPrevIndex(index, len)
-		const nextIndex = getNextIndex(index, len)
-		preloadTrackAt(prevIndex)
-		preloadTrackAt(nextIndex)
+
+		const prev = album?.tracks[getPrevIndex(loadedIndex.current, len)]
+
+		const next =
+			queue[1] ??
+			(album && {
+				dir: album.dir,
+				track: album.tracks[getNextIndex(loadedIndex.current, len)],
+			})
+
+		const keep = new Set<string>()
+
+		if (album && prev) {
+			preloadTrack(album.dir, prev)
+			keep.add(getCacheKey(album.dir, prev))
+		}
+		if (next) {
+			preloadTrack(next.dir, next.track)
+			keep.add(getCacheKey(next.dir, next.track))
+		}
 
 		// remove all preloads that no longer apply to the current track
-		const keep = new Set([index, prevIndex, nextIndex])
-		for (const [cachedIndex, promise] of preloadCache.current) {
-			if (keep.has(cachedIndex)) continue
+		for (const [cacheKey, promise] of preloadCache.current) {
+			if (keep.has(cacheKey)) continue
 			promise.then((result) => result && URL.revokeObjectURL(result.trackUrl))
-			preloadCache.current.delete(cachedIndex)
+			preloadCache.current.delete(cacheKey)
 		}
+	}
+
+	function preloadTrack(dir: string, track: TrackFile) {
+		const cacheKey = getCacheKey(dir, track)
+		if (preloadCache.current.has(cacheKey)) return
+
+		const audioFile = fetchAudioFile(dir, track.file, track.format)
+		preloadCache.current.set(cacheKey, audioFile)
+
+		audioFile.then((result) => {
+			if (!result) preloadCache.current.delete(cacheKey)
+		})
 	}
 
 	return {
@@ -167,4 +194,8 @@ function getPrevIndex(index: number, trackListLen: number): number {
 function getNextIndex(index: number, trackListLen: number): number {
 	if (index === trackListLen - 1) return 0
 	return index + 1
+}
+
+function getCacheKey(dir: string, track: TrackFile) {
+	return `${dir}/${track.file}`
 }
