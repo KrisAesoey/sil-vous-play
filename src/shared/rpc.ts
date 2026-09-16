@@ -37,6 +37,10 @@ export type MyRPC = {
 				}
 				response: string | null
 			}
+			loadCovers: {
+				params: string[]
+				response: Record<string, string>
+			}
 		}
 		messages: Record<string, never>
 	}>
