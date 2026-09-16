@@ -1,5 +1,6 @@
 import type { AlbumEntry } from "../../../shared/audio"
 import { usePlaybackContext } from "../../playback/playbackContext"
+import { useQueueContext } from "../../queue/queueContext"
 import {
 	DataCell,
 	HeaderCell,
@@ -22,6 +23,7 @@ type Props = {
 
 export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 	const { nowPlaying } = usePlaybackContext()
+	const { enqueue } = useQueueContext()
 
 	const isPlaying = (track: number) =>
 		nowPlaying?.albumDir === album.dir && nowPlaying.trackNumber === track
@@ -57,6 +59,7 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 						<TableRow
 							key={`${track.trackNumber}-${track.file}`}
 							onClick={() => onTrackSelect(track.trackNumber)}
+							onContextMenu={() => enqueue({ dir: album.dir, track })}
 							highlight={isSelected(track.trackNumber)}
 						>
 							<DataCell>

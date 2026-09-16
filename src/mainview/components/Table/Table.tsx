@@ -28,11 +28,13 @@ type TableRowProps = {
 	children: React.ReactNode
 	highlight?: boolean
 	onClick?: () => void
+	onContextMenu?: () => void
 }
 
 export function TableRow({
 	children,
 	onClick,
+	onContextMenu,
 	highlight = false,
 }: TableRowProps) {
 	const style = highlight ? styles.highlight : ""
@@ -40,6 +42,7 @@ export function TableRow({
 	return (
 		<tr
 			className={style}
+			onContextMenu={onContextMenu}
 			onClick={onClick}
 			onKeyDown={(e) => {
 				if (e.key === "Enter") onClick?.()
