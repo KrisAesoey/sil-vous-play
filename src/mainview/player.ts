@@ -48,8 +48,8 @@ export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAudioPlayer {
 		const track = await rpc.request.readTrackFile({ directory, filename })
 		if (!track) return null
 
-		const base64Track = atob(track)
-		const trackBytes = Uint8Array.from(base64Track, (x) => x.charCodeAt(0))
+		// TODO (perf): round-trips base64 over RPC, could be revisited
+		const trackBytes = Uint8Array.fromBase64(track)
 		const audioBlob = new Blob([trackBytes], { type: mimeType })
 		const trackUrl = URL.createObjectURL(audioBlob)
 
