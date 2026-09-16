@@ -6,6 +6,7 @@ import { PlaybackProvider } from "./playback/playbackContext"
 import { UserSettingsProvider } from "./userSettings/userSettingsContext"
 
 import "./index.css"
+import { QueueProvider } from "./queue/queueContext"
 
 const rpc = Electroview.defineRPC<MyRPC>({
 	maxRequestTime: Infinity,
@@ -20,7 +21,9 @@ if (!rootElement) throw new Error("Missing root element")
 createRoot(rootElement).render(
 	<UserSettingsProvider rpc={rpc}>
 		<PlaybackProvider>
-			<App rpc={rpc} />
+			<QueueProvider>
+				<App rpc={rpc} />
+			</QueueProvider>
 		</PlaybackProvider>
 	</UserSettingsProvider>,
 )
