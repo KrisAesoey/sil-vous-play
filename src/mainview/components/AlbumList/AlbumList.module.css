@@ -3,3 +3,14 @@
 	flex-direction: column;
 	gap: 1rem;
 }
+
+.placeholderCover {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.25rem;
+	background: var(--color-background-highlight);
+	color: var(--color-background-primary);
+	height: 32px;
+	width: 32px;
+}

@@ -19,6 +19,7 @@ export function App({ rpc }: Props) {
 	const { userSettings, isLoaded } = useUserSettingsContext()
 
 	const [albums, setAlbums] = useState<AlbumEntry[]>()
+	const [covers, setCovers] = useState<Record<string, string>>()
 
 	const [viewingAlbum, setViewingAlbum] = useState<AlbumEntry>()
 	const [selectedTrack, setSelectedTrack] = useState<number | undefined>()
@@ -55,6 +56,20 @@ export function App({ rpc }: Props) {
 		[rpc],
 	)
 
+	const loadCovers = useCallback(
+		async (albums: AlbumEntry[]) => {
+			const albumPaths = albums.map((album) => album.dir)
+			const coverMap = await rpc.request.loadCovers(albumPaths)
+			setCovers(coverMap)
+		},
+		[rpc],
+	)
+
+	useEffect(() => {
+		if (!albums) return
+		loadCovers(albums)
+	}, [albums, loadCovers])
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: only trigger on initial load
 	useEffect(() => {
 		if (!isLoaded || !userSettings.libraryRoot) return
@@ -83,7 +98,11 @@ export function App({ rpc }: Props) {
 			<div className={styles.content}>
 				<div className={styles.library}>
 					<Settings loadLibrary={loadLibrary} rpc={rpc} />
-					<AlbumList albums={albums} onAlbumSelect={handleAlbumSelect} />
+					<AlbumList
+						albums={albums}
+						onAlbumSelect={handleAlbumSelect}
+						covers={covers}
+					/>
 				</div>
 				<div className={styles.display}>
 					{viewingAlbum && (
