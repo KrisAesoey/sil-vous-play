@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from "react"
 import { IoMusicalNotes } from "react-icons/io5"
 import type { AlbumEntry } from "../../../shared/audio"
 import { Button } from "../Button/Button"
@@ -11,6 +12,22 @@ type Props = {
 }
 
 export function AlbumList({ albums, onAlbumSelect, covers }: Props) {
+	// TODO (refactor): Move out of component
+	const coverUrls = useMemo(() => {
+		if (!covers) return undefined
+		const urls: Record<string, string> = {}
+		for (const [dir, cover] of Object.entries(covers)) {
+			urls[dir] = createCoverUrl(cover)
+		}
+		return urls
+	}, [covers])
+
+	useEffect(() => {
+		return () => {
+			if (coverUrls) Object.values(coverUrls).forEach(URL.revokeObjectURL)
+		}
+	}, [coverUrls])
+
 	return (
 		<div className={styles.list}>
 			{albums?.map((albumEntry) => (
@@ -19,15 +36,15 @@ export function AlbumList({ albums, onAlbumSelect, covers }: Props) {
 					onClick={() => onAlbumSelect(albumEntry)}
 					type="button"
 				>
-					{covers?.[albumEntry.dir] && (
+					{coverUrls?.[albumEntry.dir] && (
 						<img
 							alt="cover"
-							src={createCoverUrl(covers[albumEntry.dir])}
+							src={coverUrls[albumEntry.dir]}
 							height="32px"
 							width="32px"
 						/>
 					)}
-					{!covers?.[albumEntry.dir] && (
+					{!coverUrls?.[albumEntry.dir] && (
 						<div className={styles.placeholderCover}>
 							<IoMusicalNotes />
 						</div>
