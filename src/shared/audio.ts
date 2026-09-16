@@ -25,7 +25,7 @@ export const AlbumMetadataSchema = BaseMetadataScehma.extend({
 	tracks: z.array(TrackFileSchema),
 	version: z.number(),
 	artist: z.string().optional(),
-	artwork: z.string().optional(),
+	cover: z.string().optional(),
 	year: z.string().optional(),
 })
 

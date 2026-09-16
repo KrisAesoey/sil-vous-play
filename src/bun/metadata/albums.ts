@@ -8,7 +8,7 @@ import {
 } from "../../shared/audio"
 import { METADATA_FILENAME } from "./config"
 import { getAudioTags } from "./tracks"
-import { getFileExtension, isAudioFileFormat } from "./utils"
+import { getFileExtension, isAudioFileFormat, isImageExtension } from "./utils"
 
 export async function createAlbumMetadata(
 	albumPath: string,
@@ -48,7 +48,11 @@ export async function createAlbumMetadata(
 		}
 	})
 
+	const cover = entries.find((entry) => path.parse(entry.name).name === "cover")
+	const isCoverImage = cover && isImageExtension(getFileExtension(cover))
+
 	return {
+		cover: isCoverImage ? cover.name : undefined,
 		title: path.basename(albumPath),
 		tracks: trackFiles,
 		type: "album",
@@ -56,7 +60,7 @@ export async function createAlbumMetadata(
 	}
 }
 
-async function loadAlbum(dir: string): Promise<AlbumMetadata | null> {
+export async function loadAlbum(dir: string): Promise<AlbumMetadata | null> {
 	const metadataPath = path.join(dir, METADATA_FILENAME)
 	const metadataFile = Bun.file(metadataPath)
 
