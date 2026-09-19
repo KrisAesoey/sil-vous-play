@@ -5,7 +5,11 @@
 	"scripts": {
 		"build": "electrobun build",
 		"dev": "electrobun dev --watch",
-		"start": "electrobun dev"
+		"start": "electrobun dev",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"knip": "knip",
+		"createLibrary": "bun run ./scripts/createLibrary.ts"
 	},
 	"dependencies": {
 		"clsx": "^2.1.1",
@@ -19,9 +23,11 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.5.9",
 		"@types/bun": "latest",
+		"@types/node": "^26.6.2",
 		"@types/react": "^19.2.18",
 		"@types/react-dom": "^19.2.4",
 		"@types/three": "^0.185.4",
+		"knip": "^6.37.0",
 		"typescript": "^7.0.2"
 	}
 }
