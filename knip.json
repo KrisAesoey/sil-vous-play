@@ -1,0 +1,10 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"entry": [
+		"src/bun/index.ts",
+		"src/mainview/index.tsx",
+		"electrobun.config.ts"
+	],
+	"tags": ["-lintignore"],
+	"ignoreDependencies": ["@types/three"]
+}
