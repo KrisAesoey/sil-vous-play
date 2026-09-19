@@ -24,6 +24,9 @@ jobs:
       - name: Typecheck TypeScript
         run: bun tsc --noEmit
 
+      - name: Find unused exports and files
+        run: bun run knip
+
       - name: Lint and format
         run: bun run biome check
 
