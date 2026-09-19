@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export type NowPlaying = { albumDir: string; trackNumber: number }
+type NowPlaying = { albumDir: string; trackNumber: number }
 export type UsePlayback = {
 	isPlaying: boolean
 	nowPlaying: NowPlaying | undefined

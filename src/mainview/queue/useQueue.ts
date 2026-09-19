@@ -1,7 +1,7 @@
 import { useState } from "react"
 import type { TrackFile } from "../../shared/audio"
 
-export type QueueElement = {
+type QueueElement = {
 	dir: string
 	track: TrackFile
 }
