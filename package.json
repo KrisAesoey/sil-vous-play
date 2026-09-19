@@ -9,6 +9,7 @@
 		"lint": "biome check .",
 		"format": "biome format --write .",
 		"knip": "knip",
+		"knip:fix": "knip --fix --allow-remove-files -F",
 		"createLibrary": "bun run ./scripts/createLibrary.ts"
 	},
 	"dependencies": {
