@@ -12,7 +12,7 @@ const MIME_BY_FORMAT: Record<AudioFileFormat, string> = {
 
 type Props = {
 	rpc: ReturnType<typeof Electroview.defineRPC<MyRPC>>
-	onTrackChange?: (newDir: string, newTrack: number) => void
+	onTrackChange?: (newDir: string, track: TrackFile) => void
 }
 
 type UseAudioPlayer = {
@@ -84,7 +84,7 @@ export function useAudioPlayer({ rpc, onTrackChange }: Props): UseAudioPlayer {
 		}
 
 		if (onTrackChange) {
-			onTrackChange(dir, track.trackNumber)
+			onTrackChange(dir, track)
 		}
 
 		// avoid memory leaking old blob URLs when new ones are fetched

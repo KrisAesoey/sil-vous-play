@@ -54,7 +54,7 @@ const window = new BrowserWindow({
 	url: "views://mainview/index.html",
 	rpc,
 	frame: {
-		width: 800,
+		width: 1200,
 		height: 600,
 		x: 100,
 		y: 60,

@@ -1,6 +1,7 @@
 import { useState } from "react"
+import type { TrackFile } from "../../shared/audio"
 
-type NowPlaying = { albumDir: string; trackNumber: number }
+type NowPlaying = { albumDir: string; track: TrackFile }
 export type UsePlayback = {
 	isPlaying: boolean
 	nowPlaying: NowPlaying | undefined

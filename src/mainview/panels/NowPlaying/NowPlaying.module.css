@@ -1,0 +1,27 @@
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.5rem;
+}
+
+.placeholderCover {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.25rem;
+	background: var(--color-background-highlight);
+	color: var(--color-background-primary);
+	height: 240px;
+	width: 240px;
+}
+
+.nowPlaying {
+	gap: 0.5rem;
+}
+
+.queue {
+	gap: 0.5rem;
+	width: 100%;
+}

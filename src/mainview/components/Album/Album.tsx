@@ -25,8 +25,9 @@ export function Album({ album, onTrackSelect, selectedTrack }: Props) {
 	const { nowPlaying } = usePlaybackContext()
 	const { enqueue } = useQueueContext()
 
-	const isPlaying = (track: number) =>
-		nowPlaying?.albumDir === album.dir && nowPlaying.trackNumber === track
+	const isPlaying = (trackNumber: number) =>
+		nowPlaying?.albumDir === album.dir &&
+		nowPlaying.track.trackNumber === trackNumber
 
 	const isSelected = (track: number) => track === selectedTrack
 
