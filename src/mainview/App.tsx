@@ -1,12 +1,13 @@
 import type { Electroview } from "electrobun/view"
-import type { AlbumEntry } from "../shared/audio"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import type { AlbumEntry, TrackFile } from "../shared/audio"
 import type { MyRPC } from "../shared/rpc"
 import styles from "./App.module.css"
 import { Album } from "./components/Album/Album"
 import { AlbumList } from "./components/AlbumList/AlbumList"
 import { AudioPlayer } from "./components/AudioPlayer/AudioPlayer"
 import { Settings } from "./components/Settings/Settings"
+import { NowPlaying } from "./panels/NowPlaying/NowPlaying"
 import { usePlaybackContext } from "./playback/playbackContext"
 import { useAudioPlayer } from "./player"
 import { useUserSettingsContext } from "./userSettings/userSettingsContext"
@@ -77,8 +78,8 @@ export function App({ rpc }: Props) {
 		loadLibrary(userSettings.libraryRoot)
 	}, [isLoaded])
 
-	function handleTrackChange(albumDir: string, trackNumber: number) {
-		setNowPlaying({ albumDir, trackNumber })
+	function handleTrackChange(albumDir: string, track: TrackFile) {
+		setNowPlaying({ albumDir, track })
 		setSelectedTrack(undefined)
 	}
 
@@ -128,6 +129,7 @@ export function App({ rpc }: Props) {
 						/>
 					)}
 				</div>
+				<NowPlaying covers={coverUrls} />
 			</div>
 			<AudioPlayer
 				currentTrackUrl={currentTrackUrl}
