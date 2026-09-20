@@ -1,6 +1,6 @@
 import type { Electroview } from "electrobun/view"
-import { useCallback, useEffect, useState } from "react"
 import type { AlbumEntry } from "../shared/audio"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import type { MyRPC } from "../shared/rpc"
 import styles from "./App.module.css"
 import { Album } from "./components/Album/Album"
@@ -93,6 +93,21 @@ export function App({ rpc }: Props) {
 		onTrackChange: handleTrackChange,
 	})
 
+	const coverUrls = useMemo(() => {
+		if (!covers) return undefined
+		const urls: Record<string, string> = {}
+		for (const [dir, cover] of Object.entries(covers)) {
+			urls[dir] = createCoverUrl(cover)
+		}
+		return urls
+	}, [covers])
+
+	useEffect(() => {
+		return () => {
+			if (coverUrls) Object.values(coverUrls).forEach(URL.revokeObjectURL)
+		}
+	}, [coverUrls])
+
 	return (
 		<div className={styles.container}>
 			<div className={styles.content}>
@@ -101,7 +116,7 @@ export function App({ rpc }: Props) {
 					<AlbumList
 						albums={albums}
 						onAlbumSelect={handleAlbumSelect}
-						covers={covers}
+						covers={coverUrls}
 					/>
 				</div>
 				<div className={styles.display}>
@@ -122,4 +137,10 @@ export function App({ rpc }: Props) {
 			/>
 		</div>
 	)
+}
+
+function createCoverUrl(cover: string) {
+	const trackBytes = Uint8Array.fromBase64(cover)
+	const coverBlob = new Blob([trackBytes])
+	return URL.createObjectURL(coverBlob)
 }
